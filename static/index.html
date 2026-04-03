@@ -64,6 +64,30 @@
       font-family: var(--font);
     }
 
+    .exam-plan-card {
+      border: 1px solid var(--border);
+      background: rgba(40, 40, 40, 0.75);
+      border-radius: 12px;
+      padding: 14px;
+      margin-bottom: 12px;
+      font-family: var(--font);
+      color: var(--text);
+    }
+
+    .exam-plan-card .plan-section {
+      margin-top: 10px;
+    }
+
+    .exam-plan-card .plan-section strong {
+      color: #fff;
+    }
+
+    .exam-plan-card .plan-concepts {
+      margin-top: 6px;
+      font-size: 14px;
+      color: #d6d6d6;
+    }
+
     /* ─── SCROLLBAR ────────────────────────────── */
     ::-webkit-scrollbar {
       width: 4px;
@@ -834,6 +858,64 @@
       margin-bottom: 14px;
     }
 
+    .question-card textarea {
+      width: 100%;
+      min-height: 120px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px;
+      color: #fff;
+      background: rgba(255,255,255,0.05);
+      font-size: 14px;
+      resize: vertical;
+    }
+
+    .themed-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.56);
+      backdrop-filter: blur(2px);
+      z-index: 9998;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .themed-modal-overlay.active {
+      display: flex;
+    }
+
+    .themed-modal {
+      background: #101318;
+      border: 1px solid #2d343e;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      width: min(92vw, 420px);
+      padding: 20px;
+      color: #fff;
+      z-index: 9999;
+    }
+
+    .themed-modal button {
+      background: #dc2626;
+      border: none;
+      color: #fff;
+      display: inline-block;
+      padding: 8px 14px;
+      margin-left: 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: opacity .2s ease;
+    }
+
+    .themed-modal button.secondary {
+      background: #1f2937;
+    }
+
+    .themed-modal button:hover {
+      opacity: .88;
+    }
+
     .question-num {
       font-size: 11px;
       font-family: var(--mono);
@@ -1433,6 +1515,15 @@
             </div>
           </div>
         </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-label">Loaded Playlist</div>
+          <div class="chapter-list" id="loadedVideosList">
+            <div class="chapter-item" style="color:var(--dim); font-size:12px; padding:10px 8px;">
+              Add more videos from the summary panel.
+            </div>
+          </div>
+        </div>
       </aside>
 
       <!-- MAIN PANEL -->
@@ -1482,6 +1573,7 @@
         <div class="tab-content active" id="tab-summary">
           <div class="summary-header">
             <h2 class="summary-title" id="summaryTitle">Loading summary…</h2>
+            <div style="margin-top: 6px; color: var(--dim); font-size: 13px;" id="summaryVideoInfo">Videos loaded: 0</div>
             <div class="action-chips">
               <button class="chip primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1489,13 +1581,40 @@
                 </svg>
                 AI Summary
               </button>
-              <button class="chip">
+              <button class="chip" onclick="addVideo()" id="addVideoBtn" title="Add another video to this session">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                Add Video
+              </button>
+              <button class="chip" onclick="toggleCrossVideoMode()" id="crossVideoBtn" title="Toggle cross-video QA mode">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M8 17l4-4 4 4" />
+                  <path d="M8 7l4 4 4-4" />
+                </svg>
+                Cross-video: Off
+              </button>
+              <button class="chip" onclick="exportChat()" id="exportChatBtn" title="Export the conversation history">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                   <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
                 </svg>
-                Export
+                Export Chat
+              </button>
+              <button class="chip" onclick="startExamMode()" id="examModeBtn" title="Generate an optimized exam study plan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <polyline points="12 6 12 12 16 14" />
+                </svg>
+                Exam Mode
+              </button>
+              <button class="chip" onclick="exitExamMode()" id="exitExamModeBtn" title="Exit exam mode when ready" disabled style="display:none;">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <line x1="18" y1="6" x2="6" y2="18" />
+                  <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+                Exit Exam
               </button>
             </div>
           </div>
@@ -1523,6 +1642,10 @@
           <div class="quiz-header">
             <div class="quiz-title">Knowledge Check</div>
             <div class="quiz-subtitle" id="quizSubtitle">Click below to generate a quiz based on this video.</div>
+            <div class="quiz-meta" style="margin-top:6px; font-size:13px; color: var(--dim);">
+              <span id="quizTimer">⏱️ Time left: 00:00</span>
+              <span id="quizModeLabel" style="margin-left:16px;">Mode: Normal</span>
+            </div>
           </div>
           <div id="quizContent">
             <div style="text-align:center; padding:40px 20px;">
@@ -1565,13 +1688,14 @@
               </svg>
               AI Fill
             </button>
-            <button class="tool-btn" onclick="exportNotes()">
+            <button class="tool-btn" id="downloadPdfBtn" onclick="downloadNotesPDF()" title="Download notes as PDF">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                <polyline points="7 10 12 15 17 10" />
-                <line x1="12" y1="15" x2="12" y2="3" />
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+                <line x1="12" y1="19" x2="12" y2="12" />
+                <polyline points="9 16 12 19 15 16" />
               </svg>
-              Export
+              Download PDF
             </button>
           </div>
           <textarea class="notes-area" id="notesArea"
@@ -1702,11 +1826,344 @@
     </div><!-- /layout -->
   </div><!-- /app -->
 
+<div id="themedModalOverlay" class="themed-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="themedModalTitle">
+    <div class="themed-modal" id="themedModal">
+      <div id="themedModalText" style="margin-bottom: 16px; font-size: 15px; line-height: 1.4;"></div>
+      <div id="themedModalInputWrapper" style="display:none; margin-bottom: 16px;">
+        <input id="themedModalInput" type="text" style="width:100%; padding:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px;" />
+      </div>
+      <div style="display:flex; justify-content:flex-end;">
+        <button id="themedModalCancel" class="secondary" style="display:none;">Cancel</button>
+        <button id="themedModalOk">OK</button>
+      </div>
+    </div>
+  </div>
+
   <script>
 
     let sessionId = null;
     let isReady = false;
     let transcriptLoaded = false;
+    let crossVideoMode = false;
+    let examModeEnabled = false;
+    let examModeTopic = '';
+    let examModeEndTime = null;
+    let examModeTimerId = null;
+    let lastExamPlanHtml = '';
+    let quizInProgress = false;
+    let quizDurationMs = 10 * 60 * 1000; // default 10 minutes
+    let quizTimerId = null;
+    let quizEndTime = null;
+    let loadedVideos = [];
+
+    function updateSummaryVideoInfo() {
+      const el = document.getElementById('summaryVideoInfo');
+      if (el) {
+        el.textContent = `Videos loaded: ${loadedVideos.length}`;
+      }
+    }
+
+    function renderLoadedVideos() {
+      const list = document.getElementById('loadedVideosList');
+      if (!list) return;
+      if (!loadedVideos.length) {
+        list.innerHTML = `<div class="chapter-item" style="color:var(--dim); font-size:12px; padding:10px 8px;">Add more videos from the summary panel.</div>`;
+        return;
+      }
+      list.innerHTML = '';
+      loadedVideos.forEach(video => {
+        const item = document.createElement('div');
+        item.className = 'chapter-item';
+        item.style.display = 'flex';
+        item.style.justifyContent = 'space-between';
+        item.style.alignItems = 'center';
+        item.innerHTML = `
+          <span style="font-size:12px; color:var(--text);">${video.label} - ${video.title || video.video_id}</span>
+          <span style="font-family:var(--mono); font-size:11px; color:var(--accent);">${video.video_id}</span>
+        `;
+        list.appendChild(item);
+      });
+      updateSummaryVideoInfo();
+    }
+
+    function setCrossVideoMode(enabled) {
+      crossVideoMode = enabled;
+      const btn = document.getElementById('crossVideoBtn');
+      if (btn) {
+        btn.textContent = `Cross-video: ${enabled ? 'On' : 'Off'}`;
+        btn.style.background = enabled ? 'rgba(255, 68, 68, 0.13)' : 'transparent';
+      }
+    }
+
+    async function addVideo() {
+      if (!sessionId) {
+        await themeAlert('Please load a video first.');
+        return;
+      }
+      const url = prompt('Enter the YouTube URL of the next video:');
+      if (!url || !url.trim()) return;
+
+      const btn = document.getElementById('addVideoBtn');
+      const orig = btn ? btn.innerHTML : null;
+      if (btn) {
+        btn.innerText = 'Adding…';
+        btn.disabled = true;
+      }
+
+      try {
+        const response = await fetch('/add-video', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, url: url.trim() })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Failed to add video.');
+
+        const newVideo = {
+          video_id: data.video_id,
+          label: data.label || `Video ${loadedVideos.length + 1}`,
+          title: data.title || data.label || data.video_id,
+        };
+
+        loadedVideos.push(newVideo);
+        renderLoadedVideos();
+
+        appendAiMessage(`Added ${newVideo.label}. You can now ask cross-video questions.`, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+        await themeAlert(data.message || `${newVideo.label} added.`);
+      } catch (err) {
+        await themeAlert('Error adding video: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.innerHTML = orig || 'Add Video';
+          btn.disabled = false;
+        }
+      }
+    }
+
+    function setExamModeLabel() {
+      const label = document.getElementById('quizModeLabel');
+      const exitBtn = document.getElementById('exitExamModeBtn');
+
+      if (examModeEnabled && examModeEndTime) {
+        const diff = Math.max(0, examModeEndTime - Date.now());
+        const minutes = String(Math.floor(diff / 60000)).padStart(2, '0');
+        const seconds = String(Math.floor((diff % 60000) / 1000)).padStart(2, '0');
+
+        if (label) {
+          label.textContent = `Mode: Exam (${minutes}:${seconds} remaining)`;
+        }
+
+        if (exitBtn) {
+          exitBtn.disabled = diff > 0;
+          exitBtn.title = diff > 0 ? 'Exam time remaining; complete it before exiting.' : 'Click to exit exam mode';
+        }
+
+        if (diff <= 0) {
+          clearInterval(examModeTimerId);
+          examModeTimerId = null;
+        }
+      } else {
+        if (label) label.textContent = 'Mode: Normal';
+        if (exitBtn) {
+          exitBtn.disabled = true;
+          exitBtn.title = 'Enter exam mode to enable this';
+        }
+      }
+    }
+
+    async function exitExamMode() {
+      if (!examModeEnabled) {
+        await themeAlert('Exam mode is not active.');
+        return;
+      }
+
+      const now = Date.now();
+      if (examModeEndTime && now < examModeEndTime) {
+        const remaining = examModeEndTime - now;
+        const mins = Math.ceil(remaining / 60000);
+        const confirmExit = await themeConfirm(`Exam mode time is not complete (${mins} minutes left). Do you want to exit early?`);
+        if (!confirmExit) return;
+      }
+
+      examModeEnabled = false;
+      examModeTopic = '';
+      examModeEndTime = null;
+      clearInterval(examModeTimerId);
+      examModeTimerId = null;
+      setExamModeLabel();
+
+      const examBtn = document.getElementById('examModeBtn');
+      if (examBtn) {
+        examBtn.classList.remove('primary');
+        examBtn.textContent = 'Exam Mode';
+      }
+
+      const exitBtn = document.getElementById('exitExamModeBtn');
+      if (exitBtn) {
+        exitBtn.style.display = 'none';
+        exitBtn.disabled = true;
+      }
+
+      await themeAlert('Exam mode ended. You can continue regular YouTube-based learning flows.');
+      switchTab('summary', document.querySelector('.tab[onclick*="summary"]'));
+    }
+
+    function startQuizTimer() {
+      stopQuizTimer();
+      quizEndTime = Date.now() + quizDurationMs;
+
+      const timerEl = document.getElementById('quizTimer');
+      const update = () => {
+        const remaining = Math.max(0, quizEndTime - Date.now());
+        const minutes = String(Math.floor(remaining / 60000)).padStart(2, '0');
+        const seconds = String(Math.floor((remaining % 60000) / 1000)).padStart(2, '0');
+        if (timerEl) timerEl.textContent = `⏱️ Time left: ${minutes}:${seconds}`;
+
+        if (remaining <= 0) {
+          stopQuizTimer();
+          submitQuiz(true);
+        }
+      };
+
+      update();
+      quizTimerId = setInterval(update, 1000);
+    }
+
+    function stopQuizTimer() {
+      if (quizTimerId) {
+        clearInterval(quizTimerId);
+        quizTimerId = null;
+      }
+    }
+
+    function toggleCrossVideoMode() {
+      setCrossVideoMode(!crossVideoMode);
+      const msg = crossVideoMode ? 'Cross-video QA enabled.' : 'Cross-video QA disabled.';
+      appendAiMessage(msg, new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    }
+
+    async function exportChat() {
+      if (!sessionId) {
+        await themeAlert('Please load a video first.');
+        return;
+      }
+
+      try {
+        const response = await fetch('/export-chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Failed to export chat.');
+
+        const blob = new Blob([data.content || ''], { type: 'text/plain;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'vidmind_chat_export.txt';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      } catch (err) {
+        await themeAlert('Error exporting chat: ' + err.message);
+      }
+    }
+
+    async function startExamMode() {
+      if (!sessionId) {
+        await themeAlert('Please load a video first.');
+        return;
+      }
+
+      const topic = await themePrompt('Enter the exam topic or subject:', 'NLP, Algorithms, Data Science');
+      if (!topic || !topic.trim()) return;
+
+      const hoursText = await themePrompt('How many hours do you have to study? (e.g., 2.5)', '2');
+      const hours = parseFloat(hoursText);
+      if (isNaN(hours) || hours <= 0) {
+        await themeAlert('Please enter a valid number of hours.');
+        return;
+      }
+
+      examModeEnabled = true;
+      examModeTopic = topic.trim();
+      examModeEndTime = Date.now() + Math.round(hours * 60 * 60 * 1000);
+      quizDurationMs = Math.round(hours * 60 * 60 * 1000);
+      setExamModeLabel();
+
+      const examBtn = document.getElementById('examModeBtn');
+      if (examBtn) {
+        examBtn.classList.add('primary');
+        examBtn.textContent = 'Exam Mode: ON';
+      }
+
+      const exitBtn = document.getElementById('exitExamModeBtn');
+      if (exitBtn) {
+        exitBtn.style.display = 'inline-flex';
+        exitBtn.disabled = true;
+        exitBtn.title = 'Exam mode active until timer ends';
+      }
+
+      clearInterval(examModeTimerId);
+      examModeTimerId = setInterval(setExamModeLabel, 1000);
+
+      try {
+        const response = await fetch('/generate-study-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: sessionId, topic: examModeTopic, hours: hours })
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Failed to generate study plan.');
+
+        let planHtml = `<div class="exam-plan-card"><h3>📚 Exam Study Plan for ${examModeTopic}</h3>`;
+        planHtml += `<div style="margin-bottom:10px; font-size:13px; color: var(--dim);">Estimated time: ${hours} hours</div>`;
+
+        if (Array.isArray(data.plan) && data.plan.length > 0) {
+          data.plan.forEach((section, i) => {
+            planHtml += `<div class="plan-section">`;
+            planHtml += `<strong>${i + 1}. ${section.section} (${section.duration_mins} mins)</strong>`;
+            planHtml += `<div class="plan-concepts">Concepts: ${section.concepts.join(', ') || 'No details'} </div>`;
+            planHtml += `<div class="plan-concepts">Checkpoint: ${section.checkpoint_question || 'N/A'}</div>`;
+            planHtml += `<button class="chip" style="margin-top:10px;" onclick="quizMeOnSection('${encodeURIComponent(section.section)}')">Quiz me on this</button>`;
+            planHtml += `</div>`;
+          });
+        } else {
+          planHtml += `<p style="color: var(--dim);">No plan sections available yet.</p>`;
+        }
+
+        if (Array.isArray(data.quick_tips) && data.quick_tips.length > 0) {
+          planHtml += `<div style="margin-top:12px;"><strong>Quick Tips:</strong><ul>${data.quick_tips.map(tip => `<li>${tip}</li>`).join('')}</ul></div>`;
+        }
+
+        planHtml += `</div>`;
+        lastExamPlanHtml = planHtml;
+
+        document.getElementById('quizContent').innerHTML = lastExamPlanHtml;
+
+        // Keep in exam mode and remain on plan until user clicks section quiz
+        const quizTabButton = document.querySelector('.tab[onclick*="quiz"]');
+        if (quizTabButton) {
+          quizTabButton.click();
+        }
+      } catch (err) {
+        await themeAlert('Error generating exam plan: ' + err.message);
+        examModeEnabled = false;
+        setExamModeLabel();
+        if (examBtn) {
+          examBtn.classList.remove('primary');
+          examBtn.textContent = 'Exam Mode';
+        }
+        const exitBtn = document.getElementById('exitExamModeBtn');
+        if (exitBtn) {
+          exitBtn.style.display = 'none';
+          exitBtn.disabled = true;
+        }
+      }
+    }
+
 
     async function openApp() {
       const raw = document.getElementById('urlInput').value.trim();
@@ -1737,6 +2194,14 @@
         document.getElementById('app').classList.remove('hidden');
         sessionId = data.session_id;
         isReady = true;
+        loadedVideos = [{
+          video_id: data.video_id,
+          label: 'Video 1',
+          title: data.title || 'Video 1'
+        }];
+        renderLoadedVideos();
+        updateSummaryVideoInfo();
+        setCrossVideoMode(false);
 
         // ── Populate sidebar: embed YouTube video ──
         const videoId = data.video_id;
@@ -1803,6 +2268,14 @@
           </div>`;
         document.getElementById('quizSubtitle').textContent = 'Click below to generate a quiz based on this video.';
         document.getElementById('notesArea').value = '';
+
+        // Reset quiz state
+        quizData = null;
+        quizAnswers = [];
+        quizStartTime = null;
+        questionStartTime = null;
+        currentQuestionIndex = 0;
+
         transcriptLoaded = false;
         document.getElementById('transcriptContent').innerHTML = `
           <div class="section-block-title">Auto-Generated Transcript</div>
@@ -1814,7 +2287,7 @@
         appendAiMessage("Hi! I'm VidMind AI. I've successfully analyzed your video. What would you like to know?");
 
       } catch (err) {
-        alert("Error: " + err.message);
+        await themeAlert("Error: " + err.message);
       } finally {
         analyzeBtn.innerHTML = originalBtnHtml;
         analyzeBtn.disabled = false;
@@ -1829,6 +2302,11 @@
     }
 
     function switchTab(id, btn) {
+      if (quizInProgress && id !== 'quiz') {
+        themeAlert('Quiz in progress. Stay on the quiz tab until submission or timeout.');
+        return;
+      }
+
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       btn.classList.add('active');
@@ -1839,87 +2317,439 @@
       }
     }
 
+    // ── QUIZ STATE MANAGEMENT ──
+    let quizData = null;
+    let quizAnswers = [];
+    let quizStartTime = null;
+    let questionStartTime = null;
+    let currentQuestionIndex = 0;
+
+    function showThemeModal(message, type = 'alert') {
+      return new Promise(resolve => {
+        const overlay = document.getElementById('themedModalOverlay');
+        const text = document.getElementById('themedModalText');
+        const btnOk = document.getElementById('themedModalOk');
+        const btnCancel = document.getElementById('themedModalCancel');
+
+        text.textContent = message;
+        overlay.classList.add('active');
+
+        btnOk.onclick = () => {
+          overlay.classList.remove('active');
+          if (type === 'confirm') resolve(true);
+          else resolve(true);
+        };
+
+        if (type === 'confirm') {
+          btnCancel.style.display = 'inline-block';
+          btnCancel.onclick = () => {
+            overlay.classList.remove('active');
+            resolve(false);
+          };
+        } else {
+          btnCancel.style.display = 'none';
+        }
+      });
+    }
+
+    async function themeAlert(message) {
+      await showThemeModal(message, 'alert');
+    }
+
+    async function themeConfirm(message) {
+      return await showThemeModal(message, 'confirm');
+    }
+
+    async function themePrompt(message, placeholder = '') {
+      const overlay = document.getElementById('themedModalOverlay');
+      const text = document.getElementById('themedModalText');
+      const inputWrapper = document.getElementById('themedModalInputWrapper');
+      const input = document.getElementById('themedModalInput');
+      const btnOk = document.getElementById('themedModalOk');
+      const btnCancel = document.getElementById('themedModalCancel');
+
+      if (!overlay || !text || !inputWrapper || !input || !btnOk || !btnCancel) {
+        return window.prompt(message) || '';
+      }
+
+      text.textContent = message;
+      input.value = '';
+      input.placeholder = placeholder;
+      inputWrapper.style.display = 'block';
+      overlay.classList.add('active');
+      input.focus();
+
+      return new Promise(resolve => {
+        const cleanup = () => {
+          overlay.classList.remove('active');
+          inputWrapper.style.display = 'none';
+          btnOk.onclick = null;
+          btnCancel.onclick = null;
+        };
+
+        btnOk.onclick = () => {
+          cleanup();
+          resolve(input.value.trim());
+        };
+
+        btnCancel.style.display = 'inline-block';
+        btnCancel.onclick = () => {
+          cleanup();
+          resolve('');
+        };
+      });
+    }
+
     function selectOption(el) {
       const parent = el.closest('.options');
       parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
       el.classList.add('selected');
 
-      // Check answer
-      const card = el.closest('.question-card');
-      const correct = card.dataset.correct;
+      const questionTime = Date.now() - questionStartTime;
       const letter = el.querySelector('.option-letter').textContent.trim();
-      if (correct) {
-        if (letter === correct) {
-          el.style.borderColor = '#22c55e';
-          el.style.background = 'rgba(34,197,94,0.08)';
-        } else {
-          el.style.borderColor = '#ef4444';
-          el.style.background = 'rgba(239,68,68,0.08)';
-          // Highlight correct
-          parent.querySelectorAll('.option').forEach(o => {
-            if (o.querySelector('.option-letter').textContent.trim() === correct) {
-              o.style.borderColor = '#22c55e';
-              o.style.background = 'rgba(34,197,94,0.08)';
-            }
+
+      quizAnswers[currentQuestionIndex] = quizAnswers[currentQuestionIndex] || {};
+      quizAnswers[currentQuestionIndex].selected = letter;
+      quizAnswers[currentQuestionIndex].timeSpent = questionTime;
+
+      const nextBtn = document.getElementById('quizNextBtn');
+      const submitBtn = document.getElementById('quizSubmitBtn');
+      if (nextBtn) nextBtn.disabled = false;
+      if (submitBtn && currentQuestionIndex === quizData.length - 1) submitBtn.disabled = false;
+    }
+
+    function showQuestion(index) {
+      questionStartTime = Date.now();
+      const q = quizData[index];
+      const isMCQ = q.options && Object.keys(q.options).length > 0;
+
+      let saved = null;
+      if (!isMCQ) {
+        saved = quizAnswers[index] && quizAnswers[index].written;
+      }
+
+      let bodyHtml = `
+        <div class="question-card">
+          <div class="question-num">Q${index + 1} of ${quizData.length}</div>
+          <div class="question-text">${q.question}</div>`;
+
+      if (isMCQ) {
+        bodyHtml += '<div class="options">';
+        Object.keys(q.options).forEach(letter => {
+          bodyHtml += `
+            <div class="option" onclick="selectOption(this)">
+              <span class="option-letter">${letter}</span>
+              ${q.options[letter]}
+            </div>`;
+        });
+        bodyHtml += '</div>';
+      } else {
+        bodyHtml += `
+          <div style="margin-top: 14px;">
+            <textarea id="descriptiveAnswer" placeholder="Write your answer here..." style="width:100%; min-height:120px; border:1px solid var(--border); border-radius:8px; padding:10px; background: var(--surface);"></textarea>
+          </div>`;
+        setTimeout(() => {
+          if (saved && document.getElementById('descriptiveAnswer')) {
+            document.getElementById('descriptiveAnswer').value = saved;
+          }
+        }, 0);
+      }
+
+      bodyHtml += '</div>';
+
+      bodyHtml += `
+        <div style="display:flex; justify-content: space-between; margin-top: 16px;">`;
+      bodyHtml += `<button class="chip" id="quizPrevBtn" onclick="gotoQuestion(${index - 1})" ${index === 0 ? 'disabled' : ''}>← Previous</button>`;
+      bodyHtml += `<button class="chip" id="quizNextBtn" onclick="gotoQuestion(${index + 1})" ${index === quizData.length - 1 ? 'disabled' : ''}>Next →</button>`;
+      bodyHtml += `<button class="chip primary" id="quizSubmitBtn" onclick="submitQuiz(false)" ${quizData.length ? '' : 'disabled'}>Submit</button>`;
+      bodyHtml += `</div>`;
+
+      document.getElementById('quizContent').innerHTML = bodyHtml;
+
+      if (!isMCQ) {
+        const textarea = document.getElementById('descriptiveAnswer');
+        const submitBtn = document.getElementById('quizSubmitBtn');
+        const nextBtn = document.getElementById('quizNextBtn');
+        if (textarea) {
+          textarea.addEventListener('input', () => {
+            const value = textarea.value.trim();
+            quizAnswers[index] = quizAnswers[index] || {};
+            quizAnswers[index].written = value;
+            if (submitBtn) submitBtn.disabled = !value;
+            if (nextBtn && index < quizData.length - 1) nextBtn.disabled = !value;
           });
+
+          if (saved) {
+            textarea.value = saved;
+            if (submitBtn) submitBtn.disabled = !saved;
+            if (nextBtn && index < quizData.length - 1) nextBtn.disabled = !saved;
+          }
         }
       }
+
+      const prevBtn = document.getElementById('quizPrevBtn');
+      const nextBtn = document.getElementById('quizNextBtn');
+
+      const existingAnswer = quizAnswers[index];
+      if (existingAnswer && existingAnswer.selected) {
+        const optionEls = document.querySelectorAll('.option');
+        optionEls.forEach(el => {
+          if (el.querySelector('.option-letter')?.textContent.trim() === existingAnswer.selected) {
+            el.classList.add('selected');
+          }
+        });
+      }
+
+      const hasAnswer = isMCQ ? (existingAnswer && existingAnswer.selected) : (existingAnswer && existingAnswer.written);
+      if (nextBtn) nextBtn.disabled = !hasAnswer;
+      if (prevBtn) prevBtn.disabled = index === 0;
+      if (document.getElementById('quizSubmitBtn')) document.getElementById('quizSubmitBtn').disabled = !hasAnswer;
+    }
+
+    function gotoQuestion(index) {
+      if (index < 0 || index >= quizData.length) return;
+      currentQuestionIndex = index;
+      showQuestion(index);
+    }
+
+    async function submitQuiz(autoTimeout) {
+      stopQuizTimer();
+
+      if (autoTimeout) {
+        await themeAlert('Time is up! The quiz is submitted automatically.');
+      } else {
+        const ok = await themeConfirm('Submit quiz now and view your results?');
+        if (!ok) {
+          startQuizTimer();
+          return;
+        }
+      }
+
+      showQuizResults();
+    }
+
+    function showQuizResults() {
+      quizInProgress = false;
+      const totalTime = Date.now() - quizStartTime;
+      let correctCount = 0;
+      let scoreable = 0;
+      let totalQuestions = quizData.length;
+
+      // Calculate score only for MCQs with valid correct key
+      quizData.forEach((q, index) => {
+        const answer = quizAnswers[index] || {};
+        const hasOptions = q.options && Object.keys(q.options).length > 0;
+        if (hasOptions) {
+          scoreable++;
+          if (answer.selected === q.correct) {
+            correctCount++;
+          }
+        }
+      });
+
+      const score = scoreable > 0 ? Math.round((correctCount / scoreable) * 100) : 0;
+      const avgTimePerQuestion = Math.round(totalTime / Math.max(1, totalQuestions) / 1000);
+
+      // Performance analysis
+      let performanceLevel = '';
+      let performanceColor = '';
+      if (score >= 90) {
+        performanceLevel = 'Excellent';
+        performanceColor = '#22c55e';
+      } else if (score >= 75) {
+        performanceLevel = 'Good';
+        performanceColor = '#3b82f6';
+      } else if (score >= 60) {
+        performanceLevel = 'Average';
+        performanceColor = '#f59e0b';
+      } else {
+        performanceLevel = 'Needs Improvement';
+        performanceColor = '#ef4444';
+      }
+
+      let resultsHtml = `
+      <div style="text-align: center; margin-bottom: 30px;">
+        <h2 style="color: ${performanceColor}; margin-bottom: 10px;">Quiz Complete!</h2>
+        <div style="font-size: 48px; font-weight: bold; color: ${performanceColor}; margin: 20px 0;">
+          ${scoreable > 0 ? `${score}%` : `N/A`}
+        </div>
+        <div style="font-size: 18px; color: var(--muted); margin-bottom: 20px;">
+          ${scoreable > 0 ? `${correctCount} out of ${scoreable} MCQs correct` : `No auto-scored MCQs generated. Review descriptive answers.`}
+        </div>
+        <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 30px;">
+          <h3 style="margin-bottom: 15px; color: var(--text);">Performance Summary</h3>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
+            <div>
+              <strong>Level:</strong> <span style="color: ${performanceColor};">${performanceLevel}</span>
+            </div>
+            <div>
+              <strong>Total Time:</strong> ${Math.round(totalTime / 1000)}s
+            </div>
+            <div>
+              <strong>Avg per Question:</strong> ${avgTimePerQuestion}s
+            </div>
+            <div>
+              <strong>Questions:</strong> ${totalQuestions}
+            </div>
+          </div>
+        </div>
+      </div>`;
+
+      // Show detailed results for each question
+      resultsHtml += '<h3 style="margin-bottom: 20px;">Detailed Results</h3>';
+
+      quizData.forEach((q, index) => {
+        const answer = quizAnswers[index];
+        const isCorrect = answer && answer.selected === q.correct;
+        const timeSpent = answer ? Math.round(answer.timeSpent / 1000) : 0;
+
+        resultsHtml += `
+        <div class="question-card" style="margin-bottom: 20px;">
+          <div class="question-num" style="display: flex; justify-content: space-between; align-items: center;">
+            <span>Q${index + 1}</span>
+            <span style="font-size: 12px; color: var(--dim);">
+              ${timeSpent}s ${isCorrect ?
+                '<span style="color: #22c55e;">✓ Correct</span>' :
+                '<span style="color: #ef4444;">✗ Incorrect</span>'}
+            </span>
+          </div>
+          <div class="question-text">${q.question}</div>
+          <div class="options" style="pointer-events: none;">`;
+
+        ['A', 'B', 'C', 'D'].forEach(letter => {
+          if (q.options[letter]) {
+            let optionClass = 'option';
+            let optionStyle = '';
+
+            if (letter === q.correct) {
+              optionClass += ' selected';
+              optionStyle = 'border-color: #22c55e; background: rgba(34,197,94,0.08);';
+            } else if (answer && letter === answer.selected && !isCorrect) {
+              optionClass += ' selected';
+              optionStyle = 'border-color: #ef4444; background: rgba(239,68,68,0.08);';
+            }
+
+            resultsHtml += `
+            <div class="${optionClass}" style="${optionStyle}">
+              <span class="option-letter">${letter}</span>
+              ${q.options[letter]}
+            </div>`;
+          }
+        });
+
+        resultsHtml += '</div>';
+
+        // Show explanation for wrong answers
+        if (!isCorrect) {
+          resultsHtml += `
+          <div class="explanation" style="margin-top: 15px; padding: 15px; background: rgba(239,68,68,0.05); border: 1px solid rgba(239,68,68,0.2); border-radius: 8px;">
+            <div style="font-weight: 600; color: #ef4444; margin-bottom: 8px;">💡 Explanation:</div>
+            <div style="font-size: 13px; color: var(--muted); line-height: 1.5;">${q.explanation}</div>
+          </div>`;
+        }
+
+        resultsHtml += '</div>';
+      });
+
+      // Add restart button
+      resultsHtml += `
+      <div style="text-align: center; margin-top: 24px;">
+        <button class="chip" onclick="showExamPlan()" style="font-size: 14px; padding: 10px 24px; cursor: pointer; margin-right: 8px;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M19 12H5"/><path d="M12 5l-7 7 7 7"/></svg>
+          Back to Plan
+        </button>
+        <button class="chip primary" onclick="generateQuiz()" style="font-size: 14px; padding: 10px 24px; cursor: pointer;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15.5a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+          Retake Quiz
+        </button>
+      </div>`;
+
+      document.getElementById('quizContent').innerHTML = resultsHtml;
     }
 
     // ── QUIZ GENERATION ──
-    async function generateQuiz() {
+    async function generateQuiz(section = null, topic = null) {
       if (!sessionId) return;
+      if (!topic && examModeEnabled && examModeTopic) {
+        topic = examModeTopic;
+      }
+
       const btn = document.getElementById('generateQuizBtn');
       if (btn) btn.textContent = 'Generating…';
       if (btn) btn.disabled = true;
 
       try {
+        const body = { session_id: sessionId };
+        if (section) body.section = section;
+        if (topic) body.topic = topic;
+
         const response = await fetch("/generate-quiz", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ session_id: sessionId })
+          body: JSON.stringify(body)
         });
         const data = await response.json();
         if (!response.ok) throw new Error(data.detail || "Failed to generate quiz.");
 
-        const quiz = data.quiz;
-        if (!quiz || quiz.length === 0) {
+        quizData = data.quiz;
+        if (!quizData || quizData.length === 0) {
           document.getElementById('quizContent').innerHTML = '<p style="color:var(--dim);padding:20px;">Could not generate quiz. Try again.</p>';
           return;
         }
 
-        document.getElementById('quizSubtitle').textContent =
-          `${quiz.length} questions · Based on video content · Estimated ${quiz.length} min`;
+        // Initialize quiz state
+        quizAnswers = new Array(quizData.length).fill(null);
+        quizStartTime = Date.now();
+        currentQuestionIndex = 0;
+        quizInProgress = true;
 
-        let html = '';
-        quiz.forEach((q, i) => {
-          const letters = ['A', 'B', 'C', 'D'];
-          let optionsHtml = '';
-          letters.forEach(letter => {
-            if (q.options[letter]) {
-              optionsHtml += `
-              <div class="option" onclick="selectOption(this)">
-                <span class="option-letter">${letter}</span>
-                ${q.options[letter]}
-              </div>`;
-            }
-          });
-          html += `
-          <div class="question-card" data-correct="${q.correct}">
-            <div class="question-num">Q${i + 1} of ${quiz.length}</div>
-            <div class="question-text">${q.question}</div>
-            <div class="options">${optionsHtml}</div>
-            <div class="explanation" style="display:none; margin-top:10px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:12.5px; color:var(--muted);">
-              💡 ${q.explanation}
-            </div>
-          </div>`;
-        });
-        document.getElementById('quizContent').innerHTML = html;
+        document.getElementById('quizSubtitle').textContent =
+          `${quizData.length} questions · Test your understanding · Track your progress`;
+
+        setExamModeLabel();
+
+        // Start timer in all quiz cases (strong exam behavior for exam mode)
+        startQuizTimer();
+
+        // Start with first question
+        showQuestion(0);
 
       } catch (err) {
         document.getElementById('quizContent').innerHTML =
           `<p style="color:var(--accent);padding:20px;">Error: ${err.message}</p>`;
+      } finally {
+        if (btn) btn.disabled = false;
       }
+    }
+
+    async function quizMeOnSection(section) {
+      if (!section) {
+        await themeAlert('No section selected for focused quiz.');
+        return;
+      }
+
+      const decoded = decodeURIComponent(section);
+      lastExamPlanHtml = lastExamPlanHtml || document.getElementById('quizContent').innerHTML;
+      document.getElementById('quizContent').innerHTML =
+        `<p style="color:var(--dim);padding:20px;">Generating focused quiz for <strong>${decoded}</strong>...</p>`;
+
+      // Ensure quiz tab is active in case user clicked from plan card
+      const quizTabButton = document.querySelector('.tab[onclick*="quiz"]');
+      if (quizTabButton) quizTabButton.click();
+
+      await generateQuiz(decoded, examModeTopic || null);
+      startQuizTimer();
+    }
+
+    function showExamPlan() {
+      if (!lastExamPlanHtml || lastExamPlanHtml.trim() === '') {
+        themeAlert('No exam plan available. Generate exam mode plan first.');
+        return;
+      }
+
+      document.getElementById('quizContent').innerHTML = lastExamPlanHtml;
+      const quizTabButton = document.querySelector('.tab[onclick*="quiz"]');
+      if (quizTabButton) quizTabButton.click();
     }
 
     // ── TRANSCRIPT LOADING ──
@@ -2016,146 +2846,87 @@
       area.value = area.value.substring(0, start) + replacement + area.value.substring(end);
     }
 
+    // ── SMART PDF DOWNLOAD ──
+    async function downloadNotesPDF() {
+      if (!sessionId) {
+        await themeAlert('Please load a video first');
+        return;
+      }
+
+      const btn = document.getElementById('downloadPdfBtn');
+      if (!btn) return;
+
+      const originalHtml = btn.innerHTML;
+      btn.innerHTML = 'Generating PDF...';
+      btn.disabled = true;
+
+      try {
+        const area = document.getElementById('notesArea');
+        const currentNotes = area.value.trim();
+
+        // Check if we have AI-generated notes cached or current notes
+        const hasAINotes = currentNotes && currentNotes !== '' && !currentNotes.includes('Generating AI notes') && !currentNotes.includes('Error generating notes');
+
+        let response;
+        if (hasAINotes) {
+          // Use custom notes PDF endpoint for user-edited content
+          response = await fetch("/export-custom-notes-pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              notes_text: currentNotes,
+              title: document.getElementById('summaryTitle')?.textContent || 'Study Notes'
+            })
+          });
+        } else {
+          // Use AI-generated notes PDF endpoint
+          response = await fetch("/export-notes-pdf", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ session_id: sessionId })
+          });
+        }
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: 'Unknown error' }));
+          throw new Error(errorData.detail || `HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const blob = await response.blob();
+        if (!blob || blob.size === 0) {
+          throw new Error('Received empty PDF file');
+        }
+
+        const filename = hasAINotes ?
+          (document.getElementById('summaryTitle')?.textContent || 'VidMind_Custom_Notes') :
+          (document.getElementById('summaryTitle')?.textContent || 'VidMind_Notes');
+
+        const safeName = filename.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
+        downloadBlob(blob, `${safeName}_Notes.pdf`);
+
+      } catch (error) {
+        console.error('PDF download error:', error);
+        await themeAlert('Error downloading PDF: ' + error.message);
+      } finally {
+        btn.innerHTML = originalHtml;
+        btn.disabled = false;
+      }
+    }
+
+    // ── HELPER: Download blob as file ──
+    function downloadBlob(blob, filename) {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    }
+
     function exportNotes() {
-      const area = document.getElementById('notesArea');
-      const text = area.value.trim();
-      if (!text) { alert('No notes to export!'); return; }
-
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
-      const pageW = doc.internal.pageSize.getWidth();
-      const pageH = doc.internal.pageSize.getHeight();
-      const marginL = 18, marginR = 18, marginTop = 25;
-      const usableW = pageW - marginL - marginR;
-      let y = marginTop;
-
-      function addPageHeader() {
-        doc.setFillColor(15, 15, 15);
-        doc.rect(0, 0, pageW, 18, 'F');
-        doc.setFillColor(220, 38, 38);
-        doc.rect(0, 17.5, pageW, 0.5, 'F');
-        doc.setTextColor(220, 38, 38);
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
-        doc.text('VIDMIND AI', marginL, 12);
-        doc.setTextColor(180, 180, 180);
-        doc.setFont('helvetica', 'normal');
-        doc.setFontSize(8);
-        doc.text('Study Notes Export', pageW - marginR, 12, { align: 'right' });
-      }
-
-      function addPageFooter(pgNum) {
-        doc.setDrawColor(60, 60, 60);
-        doc.line(marginL, pageH - 12, pageW - marginR, pageH - 12);
-        doc.setTextColor(120, 120, 120);
-        doc.setFontSize(7);
-        doc.text('Generated by VidMind AI — vidmind.app', marginL, pageH - 7);
-        doc.text('Page ' + pgNum, pageW - marginR, pageH - 7, { align: 'right' });
-      }
-
-      function checkPage() {
-        if (y > pageH - 20) {
-          addPageFooter(doc.getNumberOfPages());
-          doc.addPage();
-          addPageHeader();
-          y = marginTop + 5;
-        }
-      }
-
-      addPageHeader();
-      y = marginTop + 3;
-
-      const lines = text.split('\n');
-      lines.forEach(line => {
-        checkPage();
-        const trimmed = line.trimStart();
-
-        // Main heading: # Title
-        if (/^# /.test(trimmed)) {
-          y += 4;
-          doc.setTextColor(220, 38, 38);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(16);
-          const heading = trimmed.replace(/^#+ /, '').replace(/\*\*/g, '');
-          doc.text(heading, marginL, y);
-          y += 3;
-          doc.setDrawColor(220, 38, 38);
-          doc.line(marginL, y, marginL + doc.getTextWidth(heading), y);
-          y += 7;
-        }
-        // Sub-heading: ## Section
-        else if (/^## /.test(trimmed)) {
-          y += 3;
-          doc.setTextColor(50, 50, 50);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(12);
-          doc.text(trimmed.replace(/^#+ /, '').replace(/\*\*/g, ''), marginL, y);
-          y += 6;
-        }
-        // Sub-sub heading: ### 
-        else if (/^### /.test(trimmed)) {
-          y += 2;
-          doc.setTextColor(80, 80, 80);
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(10);
-          doc.text(trimmed.replace(/^#+ /, '').replace(/\*\*/g, ''), marginL, y);
-          y += 5;
-        }
-        // Bullet points: - or •
-        else if (/^[-•*] /.test(trimmed)) {
-          doc.setTextColor(50, 50, 50);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(9.5);
-          const bulletText = trimmed.replace(/^[-•*] /, '').replace(/\*\*/g, '');
-          const wrapped = doc.splitTextToSize(bulletText, usableW - 8);
-          doc.setTextColor(220, 38, 38);
-          doc.text('●', marginL + 2, y);
-          doc.setTextColor(50, 50, 50);
-          wrapped.forEach((wl, wi) => {
-            checkPage();
-            doc.text(wl, marginL + 8, y);
-            y += 4.5;
-          });
-          y += 1;
-        }
-        // Table row: | col | col |
-        else if (/^\|/.test(trimmed)) {
-          if (/^\|[-:\s|]+\|$/.test(trimmed)) return; // skip separator rows
-          doc.setTextColor(50, 50, 50);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(8.5);
-          const cells = trimmed.split('|').filter(c => c.trim());
-          const cellW = usableW / cells.length;
-          cells.forEach((cell, ci) => {
-            doc.text(cell.trim().replace(/\*\*/g, ''), marginL + ci * cellW + 2, y);
-          });
-          y += 5;
-        }
-        // Empty line
-        else if (trimmed === '') {
-          y += 3;
-        }
-        // Normal text
-        else {
-          doc.setTextColor(50, 50, 50);
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(9.5);
-          const cleanText = trimmed.replace(/\*\*/g, '');
-          const wrapped = doc.splitTextToSize(cleanText, usableW);
-          wrapped.forEach(wl => {
-            checkPage();
-            doc.text(wl, marginL, y);
-            y += 4.5;
-          });
-          y += 1;
-        }
-      });
-
-      addPageFooter(doc.getNumberOfPages());
-
-      const videoTitle = document.getElementById('summaryTitle')?.textContent || 'VidMind_Notes';
-      const safeName = videoTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
-      doc.save(`${safeName}_Notes.pdf`);
+      downloadNotesPDF();
     }
 
     function fillPrompt(btn) {
@@ -2201,7 +2972,7 @@
       msgs.appendChild(userMsg);
     }
 
-    function appendAiMessage(text, timeStr, timestamps = []) {
+    function appendAiMessage(text, timeStr, timestamps = [], sourceLabel = '', simplified = false) {
       if (!timeStr) {
         timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
       }
@@ -2209,12 +2980,25 @@
       const aiMsg = document.createElement('div');
       aiMsg.className = 'msg ai';
 
-      // Build timestamps HTML
+      // Build source + simplified badge
+      let badgeHtml = '';
+      if (sourceLabel) {
+        badgeHtml += `<span style="display:inline-block; margin-bottom:6px; font-size:11px; color:#ffb703; font-weight:600;">${sourceLabel}</span>`;
+      }
+      if (simplified) {
+        badgeHtml += `<span style="display:inline-block; margin-left:8px; font-size:11px; color:#22c55e; font-weight:600;">Simplified Explanation</span>`;
+      }
+
+      // Build timestamps / citations HTML
       let tsHtml = '';
       if (timestamps && timestamps.length > 0) {
         tsHtml = '<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">';
         timestamps.forEach(ts => {
-          tsHtml += `<a href="https://www.youtube.com/watch?v=${ts.video_id}&t=${ts.time}s" target="_blank" style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--accent); background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.2); padding:4px 12px; border-radius:20px; text-decoration:none; transition:all 0.15s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,0,0,0.08)'; this.style.color='var(--accent)';">▶ ${ts.label}</a>`;
+          const seconds = ts.seconds || ts.time || 0;
+          const label = ts.time || ts.timestamp || ts.label || `${seconds}s`;
+          const vid = ts.video_id || ts.videoId || '';
+          const href = vid ? `https://www.youtube.com/watch?v=${vid}&t=${seconds}` : '#';
+          tsHtml += `<a href="${href}" target="_blank" style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--accent); background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.2); padding:4px 12px; border-radius:20px; text-decoration:none; transition:all 0.15s;">▶ ${label}</a>`;
         });
         tsHtml += '</div>';
       }
@@ -2223,7 +3007,7 @@
       <div class="msg-avatar">VM</div>
       <div class="msg-content">
         <div class="msg-meta"><span class="msg-name">VidMind AI</span><span class="msg-time">${timeStr}</span></div>
-        <div class="bubble">${formatAiText(text)}${tsHtml}</div>
+        <div class="bubble">${badgeHtml}<div style="margin-top:3px;">${formatAiText(text)}</div>${tsHtml}</div>
       </div>
     `;
       msgs.appendChild(aiMsg);
@@ -2275,7 +3059,8 @@
       showTyping();
 
       try {
-        const response = await fetch("/chat", {
+        const endpoint = crossVideoMode ? "/cross-video-chat" : "/chat";
+        const response = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ question: text, session_id: sessionId })
@@ -2288,11 +3073,15 @@
           throw new Error(data.detail || "Failed to get response.");
         }
 
-        appendAiMessage(data.answer, now, data.timestamps);
+        const timestamps = data.timestamps || data.citations || [];
+        const sourceLabel = data.source_label || (data.mode === 'cross_video' ? '🎬 Cross-video' : (data.source === 'general' ? '⚠️ Not covered in this video' : '📹 Video grounded'));
+        const simplified = data.simplified || false;
+
+        appendAiMessage(data.answer, now, timestamps, sourceLabel, simplified);
 
       } catch (err) {
         removeTyping();
-        appendAiMessage("Error: " + err.message, now);
+        appendAiMessage("Error: " + err.message, now, [], '⚠️ Error', false);
       } finally {
         input.disabled = false;
         if (sendBtn) sendBtn.disabled = false;

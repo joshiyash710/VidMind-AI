@@ -1,45 +1,115 @@
-document.addEventListener("DOMContentLoaded", () => {
-    // Session ID from server
+﻿document.addEventListener("DOMContentLoaded", () => {
     let sessionId = null;
-    
+    let crossVideoMode = false;
+    let loadedVideos = [];
+    let isReady = false;
+
     // Elements
     const heroSection = document.getElementById("hero-section");
     const chatSection = document.getElementById("chat-wrapper");
-    
     const urlInput = document.getElementById("url-input");
     const loadBtn = document.getElementById("load-btn");
     const statusMessage = document.getElementById("status-message");
     const closeChatBtn = document.getElementById("close-chat-btn");
-    
-    // Chat interface
+
     const chatInput = document.getElementById("chat-input");
     const sendBtn = document.getElementById("send-btn");
     const chatMessages = document.getElementById("chat-messages");
+    const chatHeader = document.querySelector(".chat-header");
 
-    let isReady = false;
+    const controlsContainer = document.createElement("div");
+    controlsContainer.className = "video-controls";
 
-    // Helper to show status msg
+    function renderVideoControls() {
+        if (!chatHeader) return;
+
+        controlsContainer.innerHTML = "";
+
+        const addVideoBtn = document.createElement("button");
+        addVideoBtn.className = "tool-btn";
+        addVideoBtn.textContent = "Add Video";
+        addVideoBtn.title = "Load an additional video in this session";
+        addVideoBtn.addEventListener("click", addVideo);
+
+        const crossVideoBtn = document.createElement("button");
+        crossVideoBtn.className = "tool-btn";
+        crossVideoBtn.id = "crossVideoBtn";
+        crossVideoBtn.textContent = `Cross-video: ${crossVideoMode ? "On" : "Off"}`;
+        crossVideoBtn.title = "Toggle cross-video QA mode";
+        crossVideoBtn.addEventListener("click", toggleCrossVideoMode);
+
+        const exportChatBtn = document.createElement("button");
+        exportChatBtn.className = "tool-btn";
+        exportChatBtn.textContent = "Export Chat";
+        exportChatBtn.title = "Download current conversation";
+        exportChatBtn.addEventListener("click", exportChat);
+
+        controlsContainer.appendChild(addVideoBtn);
+        controlsContainer.appendChild(crossVideoBtn);
+        controlsContainer.appendChild(exportChatBtn);
+
+        const existing = document.getElementById("videoControlsArea");
+        if (existing) existing.replaceWith(controlsContainer);
+        else {
+            controlsContainer.id = "videoControlsArea";
+            chatHeader.appendChild(controlsContainer);
+        }
+
+        updateCrossVideoButton();
+    }
+
+    function updateCrossVideoButton() {
+        const btn = document.getElementById("crossVideoBtn");
+        if (!btn) return;
+        btn.textContent = `Cross-video: ${crossVideoMode ? "On" : "Off"}`;
+        btn.style.background = crossVideoMode ? "rgba(31, 162, 145, 0.18)" : "transparent";
+        btn.style.color = crossVideoMode ? "#ffffff" : "#dedede";
+    }
+
+    function setLoadedVideos(videos) {
+        loadedVideos = videos;
+
+        let list = document.getElementById("loadedVideosList");
+        if (!list) {
+            list = document.createElement("div");
+            list.id = "loadedVideosList";
+            list.className = "loaded-videos-list";
+            if (chatHeader) chatHeader.parentNode.insertBefore(list, chatHeader.nextSibling);
+        }
+
+        list.innerHTML = "";
+        if (loadedVideos.length === 0) {
+            list.innerHTML = "<div class='note'>No videos loaded yet.</div>";
+            return;
+        }
+
+        loadedVideos.forEach((video, index) => {
+            const item = document.createElement("div");
+            item.className = "loaded-video-item";
+            item.textContent = `${video.label || `Video ${index + 1}`}: ${video.title || video.video_id}`;
+            list.appendChild(item);
+        });
+    }
+
     function showStatus(message, isError = false) {
+        if (!statusMessage) return;
         statusMessage.textContent = message;
         statusMessage.style.color = isError ? "#ffb4ab" : "#a0aab2";
         statusMessage.classList.remove("hidden");
     }
 
-    // Helper to append messages to the chat area
     function appendMessage(sender, text, timestamps = []) {
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${sender}-msg`;
-        
+
         const bubbleDiv = document.createElement("div");
         bubbleDiv.className = "msg-bubble";
-        
-        // simple Markdown formatting for AI response (e.g. bolding)
-        let formattedText = text;
+
+        let formattedText = text || "";
         if (sender === "ai") {
             formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             formattedText = formattedText.replace(/\n/g, '<br>');
-            
-            // Build timestamps HTML
+
             if (timestamps && timestamps.length > 0) {
                 let tsHtml = '<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">';
                 timestamps.forEach(ts => {
@@ -52,17 +122,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         bubbleDiv.innerHTML = formattedText;
         msgDiv.appendChild(bubbleDiv);
-        
+
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
 
-    // Typing indicator
     function showTyping() {
         const msgDiv = document.createElement("div");
-        msgDiv.className = `message ai-msg typing-indicator-container`;
+        msgDiv.className = "message ai-msg typing-indicator-container";
         msgDiv.id = "typing-indicator";
-        
+
         const bubbleDiv = document.createElement("div");
         bubbleDiv.className = "msg-bubble";
         bubbleDiv.innerHTML = `
@@ -72,6 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <div class="typing-dot"></div>
             </div>
         `;
+
         msgDiv.appendChild(bubbleDiv);
         chatMessages.appendChild(msgDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -79,20 +149,88 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function removeTyping() {
         const indicator = document.getElementById("typing-indicator");
-        if (indicator) {
-            indicator.remove();
+        if (indicator) indicator.remove();
+    }
+
+    async function addVideo() {
+        if (!sessionId) {
+            showStatus("Please load a video first", true);
+            return;
+        }
+
+        const url = prompt("Enter the YouTube URL to add:");
+        if (!url || !url.trim()) return;
+
+        showStatus("Adding video...", false);
+
+        try {
+            const response = await fetch("/add-video", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_id: sessionId, url: url.trim() })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to add video.");
+
+            loadedVideos.push({ video_id: data.video_id, label: data.label, title: data.title });
+            setLoadedVideos(loadedVideos);
+
+            appendMessage("ai", `Added ${data.label}. Cross-video queries now include this video.`);
+            showStatus("Video added successfully.");
+        } catch (err) {
+            showStatus(err.message || "Add video failed", true);
         }
     }
 
-    // Load Transcript logic
-    loadBtn.addEventListener("click", async () => {
+    function toggleCrossVideoMode() {
+        crossVideoMode = !crossVideoMode;
+        updateCrossVideoButton();
+        appendMessage("ai", crossVideoMode ? "Cross-video mode enabled." : "Cross-video mode disabled.");
+    }
+
+    async function exportChat() {
+        if (!sessionId) {
+            showStatus("Please load a video first", true);
+            return;
+        }
+
+        try {
+            const response = await fetch("/export-chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ session_id: sessionId })
+            });
+
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to export chat.");
+
+            const blob = new Blob([data.content || ""], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "vidmind_chat_export.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+
+            showStatus("Chat exported successfully.");
+        } catch (err) {
+            showStatus(err.message || "Chat export failed", true);
+        }
+    }
+
+    function setCrossVideoMode(enabled) {
+        crossVideoMode = enabled;
+        updateCrossVideoButton();
+    }
+
+    async function loadVideo() {
         const url = urlInput.value.trim();
         if (!url) {
             showStatus("Please enter a YouTube URL", true);
             return;
         }
 
-        // Processing state
         urlInput.disabled = true;
         loadBtn.disabled = true;
         loadBtn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
@@ -106,27 +244,24 @@ document.addEventListener("DOMContentLoaded", () => {
             });
 
             const data = await response.json();
+            if (!response.ok) throw new Error(data.detail || "Failed to load transcript.");
 
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to load transcript.");
-            }
-
-            // SUCCESS! Transition UI to Chat
             sessionId = data.session_id;
             isReady = true;
-            
-            // Hide Hero, Show Chat
+
+            loadedVideos = [{ video_id: data.video_id, label: "Video 1", title: data.title || "Video 1" }];
+            setLoadedVideos(loadedVideos);
+            setCrossVideoMode(false);
+
             heroSection.classList.add("hidden");
-            // small delay to let hero fade out before chat fades in
             setTimeout(() => {
-                heroSection.style.display = 'none';
-                chatSection.classList.remove("hidden");
-                chatInput.focus();
+                heroSection.style.display = "none";
+                if (chatSection) chatSection.classList.remove("hidden");
+                if (chatInput) chatInput.focus();
             }, 500);
-            
-            chatMessages.innerHTML = '';
+
+            if (chatMessages) chatMessages.innerHTML = "";
             appendMessage("ai", "Hello! I am **VidMind AI**. I've successfully analyzed your video. What would you like to know?");
-            
         } catch (error) {
             showStatus(error.message, true);
         } finally {
@@ -134,44 +269,39 @@ document.addEventListener("DOMContentLoaded", () => {
             loadBtn.disabled = false;
             loadBtn.innerHTML = "<i class='bx bx-up-arrow-alt'></i>";
         }
-    });
+    }
 
-    // Close / Reset Chat
+    loadBtn.addEventListener("click", loadVideo);
     closeChatBtn.addEventListener("click", () => {
-        chatSection.classList.add("hidden");
-        setTimeout(() => {
-            heroSection.style.display = 'flex';
-            // slight delay to allow display computation
+        if (chatSection) {
+            chatSection.classList.add("hidden");
             setTimeout(() => {
-                heroSection.classList.remove("hidden");
-            }, 50);
-        }, 500);
+                heroSection.style.display = "flex";
+                setTimeout(() => heroSection.classList.remove("hidden"), 50);
+            }, 500);
+        }
         urlInput.value = "";
         isReady = false;
     });
 
-    // Handle pressing enter on URL input
     urlInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-            loadBtn.click();
-        }
+        if (e.key === "Enter") loadVideo();
     });
 
-    // Chat Logic
     async function handleChat() {
         const question = chatInput.value.trim();
         if (!question || !isReady) return;
 
         appendMessage("user", question);
         chatInput.value = "";
-        
         chatInput.disabled = true;
         sendBtn.disabled = true;
 
         showTyping();
 
         try {
-            const response = await fetch("/chat", {
+            const endpoint = crossVideoMode ? "/cross-video-chat" : "/chat";
+            const response = await fetch(endpoint, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: question, session_id: sessionId })
@@ -180,12 +310,9 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await response.json();
             removeTyping();
 
-            if (!response.ok) {
-                throw new Error(data.detail || "Failed to get response.");
-            }
+            if (!response.ok) throw new Error(data.detail || "Failed to get response.");
 
             appendMessage("ai", data.answer, data.timestamps);
-
         } catch (error) {
             removeTyping();
             appendMessage("ai", `Error: ${error.message}`);
@@ -198,8 +325,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     sendBtn.addEventListener("click", handleChat);
     chatInput.addEventListener("keypress", (e) => {
-        if (e.key === "Enter") {
-            handleChat();
-        }
+        if (e.key === "Enter") handleChat();
     });
+
+    renderVideoControls();
+    setLoadedVideos([]);
 });

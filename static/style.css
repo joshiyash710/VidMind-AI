@@ -501,3 +501,33 @@ body {
     from { opacity: 0; transform: translateY(10px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* Cross-video and playlist UI additions */
+.video-controls {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.loaded-videos-list {
+    margin: 8px 0;
+    padding: 8px;
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: var(--radius-lg);
+    background: rgba(255,255,255,0.03);
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.loaded-video-item {
+    display: block;
+    margin: 2px 0;
+    color: var(--text-primary);
+    font-weight: 500;
+}
+
+.loaded-videos-list .note {
+    color: var(--text-secondary);
+}
+
