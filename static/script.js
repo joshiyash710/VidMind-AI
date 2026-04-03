@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // Generate a simple unique session id for this user tab
-    const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+    // Session ID from server
+    let sessionId = null;
     
     // Elements
     const heroSection = document.getElementById("hero-section");
@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     // Helper to append messages to the chat area
-    function appendMessage(sender, text) {
+    function appendMessage(sender, text, timestamps = []) {
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${sender}-msg`;
         
@@ -38,6 +38,16 @@ document.addEventListener("DOMContentLoaded", () => {
         if (sender === "ai") {
             formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
             formattedText = formattedText.replace(/\n/g, '<br>');
+            
+            // Build timestamps HTML
+            if (timestamps && timestamps.length > 0) {
+                let tsHtml = '<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">';
+                timestamps.forEach(ts => {
+                    tsHtml += `<a href="https://www.youtube.com/watch?v=${ts.video_id}&t=${ts.time}s" target="_blank" class="tool-btn" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px; font-family:var(--font-main);">▶ ${ts.label}</a>`;
+                });
+                tsHtml += '</div>';
+                formattedText += tsHtml;
+            }
         }
 
         bubbleDiv.innerHTML = formattedText;
@@ -89,10 +99,10 @@ document.addEventListener("DOMContentLoaded", () => {
         statusMessage.classList.add("hidden");
 
         try {
-            const response = await fetch("/api/load", {
+            const response = await fetch("/load-video", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ url: url, session_id: sessionId })
+                body: JSON.stringify({ url: url })
             });
 
             const data = await response.json();
@@ -102,6 +112,7 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // SUCCESS! Transition UI to Chat
+            sessionId = data.session_id;
             isReady = true;
             
             // Hide Hero, Show Chat
@@ -160,7 +171,7 @@ document.addEventListener("DOMContentLoaded", () => {
         showTyping();
 
         try {
-            const response = await fetch("/api/chat", {
+            const response = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: question, session_id: sessionId })
@@ -173,7 +184,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 throw new Error(data.detail || "Failed to get response.");
             }
 
-            appendMessage("ai", data.answer);
+            appendMessage("ai", data.answer, data.timestamps);
 
         } catch (error) {
             removeTyping();

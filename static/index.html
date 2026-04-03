@@ -6,6 +6,7 @@
 <title>VidMind — Learn Deeper</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Bebas+Neue&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
 <style>
   :root {
     --bg:       #0f0f0f;
@@ -1010,46 +1011,24 @@
     <aside class="sidebar">
       <div class="sidebar-section">
         <div class="sidebar-label">Now Playing</div>
-        <div class="video-thumb">
+        <div class="video-thumb" id="videoThumbContainer">
           <div class="video-thumb-bg">
             <div class="play-overlay">
               <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             </div>
           </div>
-          <span class="duration-chip">12:47</span>
         </div>
         <div class="video-meta">
-          <div class="video-title">Understanding Transformer Architecture — Attention Is All You Need</div>
-          <div class="video-channel">Andrej Karpathy · 1.2M views</div>
+          <div class="video-title" id="videoTitle">Paste a URL to begin</div>
+          <div class="video-channel" id="videoChannel"></div>
         </div>
       </div>
 
       <div class="sidebar-section">
         <div class="sidebar-label">Chapters</div>
-        <div class="chapter-list">
-          <div class="chapter-item active">
-            <span class="chapter-ts">0:00</span>
-            <span class="chapter-name">Introduction to Sequence Models</span>
-          </div>
-          <div class="chapter-item">
-            <span class="chapter-ts">2:14</span>
-            <span class="chapter-name">Self-Attention Mechanism</span>
-          </div>
-          <div class="chapter-item">
-            <span class="chapter-ts">4:55</span>
-            <span class="chapter-name">Multi-Head Attention</span>
-          </div>
-          <div class="chapter-item">
-            <span class="chapter-ts">7:30</span>
-            <span class="chapter-name">Positional Encoding</span>
-          </div>
-          <div class="chapter-item">
-            <span class="chapter-ts">9:48</span>
-            <span class="chapter-name">Encoder–Decoder Architecture</span>
-          </div>
-          <div class="chapter-item">
-            <span class="chapter-ts">11:20</span>
-            <span class="chapter-name">Training & Results</span>
+        <div class="chapter-list" id="chapterList">
+          <div class="chapter-item" style="color:var(--dim); font-size:12px; padding:10px 8px;">
+            Chapters will appear after loading a video.
           </div>
         </div>
       </div>
@@ -1101,7 +1080,7 @@
       <!-- SUMMARY TAB -->
       <div class="tab-content active" id="tab-summary">
         <div class="summary-header">
-          <h2 class="summary-title">Understanding Transformer Architecture — Attention Is All You Need</h2>
+          <h2 class="summary-title" id="summaryTitle">Loading summary…</h2>
           <div class="action-chips">
             <button class="chip primary">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
@@ -1116,34 +1095,19 @@
 
         <div class="section-block">
           <div class="section-block-title">Overview</div>
-          <p>This lecture covers the seminal "Attention Is All You Need" paper, introducing the Transformer architecture that replaced RNNs with pure attention mechanisms. The video builds intuition from first principles before diving into the mathematical details of self-attention and multi-head attention.</p>
+          <p id="summaryOverview">Analyzing video content…</p>
         </div>
 
         <div class="section-block">
           <div class="section-block-title">Key Concepts</div>
-          <div class="key-points">
-            <div class="key-point">
-              <span class="key-point-dot"></span>
-              Self-attention allows each token to attend to every other token in the sequence simultaneously, enabling parallel computation unlike sequential RNNs.
-            </div>
-            <div class="key-point">
-              <span class="key-point-dot"></span>
-              Multi-head attention runs several attention operations in parallel, each learning different relationship patterns across the sequence.
-            </div>
-            <div class="key-point">
-              <span class="key-point-dot"></span>
-              Positional encodings inject sequence order information since attention is inherently permutation-invariant.
-            </div>
-            <div class="key-point">
-              <span class="key-point-dot"></span>
-              The encoder-decoder stack enables sequence-to-sequence tasks like translation while maintaining information from the full input context.
-            </div>
+          <div class="key-points" id="summaryKeyConcepts">
+            <div class="key-point" style="color:var(--dim)">Loading key concepts…</div>
           </div>
         </div>
 
         <div class="section-block">
           <div class="section-block-title">Why It Matters</div>
-          <p>The Transformer architecture is the foundation of all modern LLMs including GPT, BERT, and Claude. Understanding it deeply is essential for anyone working in AI/ML engineering, NLP research, or building intelligent systems.</p>
+          <p id="summaryWhyItMatters">Loading…</p>
         </div>
       </div>
 
@@ -1151,52 +1115,14 @@
       <div class="tab-content" id="tab-quiz">
         <div class="quiz-header">
           <div class="quiz-title">Knowledge Check</div>
-          <div class="quiz-subtitle">5 questions · Based on video content · Estimated 4 min</div>
+          <div class="quiz-subtitle" id="quizSubtitle">Click below to generate a quiz based on this video.</div>
         </div>
-
-        <div class="question-card">
-          <div class="question-num">Q1 of 5</div>
-          <div class="question-text">What is the primary advantage of self-attention over recurrent neural networks (RNNs)?</div>
-          <div class="options">
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">A</span>
-              It requires less memory during inference
-            </div>
-            <div class="option selected" onclick="selectOption(this)">
-              <span class="option-letter">B</span>
-              It allows parallel computation across all positions in the sequence
-            </div>
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">C</span>
-              It eliminates the need for positional encodings
-            </div>
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">D</span>
-              It only attends to adjacent tokens for efficiency
-            </div>
-          </div>
-        </div>
-
-        <div class="question-card">
-          <div class="question-num">Q2 of 5</div>
-          <div class="question-text">Why are positional encodings necessary in the Transformer architecture?</div>
-          <div class="options">
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">A</span>
-              To reduce the computational cost of attention
-            </div>
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">B</span>
-              To encode semantic meaning of tokens
-            </div>
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">C</span>
-              Because attention is permutation-invariant and cannot distinguish token order
-            </div>
-            <div class="option" onclick="selectOption(this)">
-              <span class="option-letter">D</span>
-              To replace the need for the feed-forward layer
-            </div>
+        <div id="quizContent">
+          <div style="text-align:center; padding:40px 20px;">
+            <button class="chip primary" id="generateQuizBtn" onclick="generateQuiz()" style="font-size:14px; padding:10px 24px; cursor:pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Generate Quiz
+            </button>
           </div>
         </div>
       </div>
@@ -1204,13 +1130,13 @@
       <!-- NOTES TAB -->
       <div class="tab-content" id="tab-notes">
         <div class="notes-toolbar">
-          <button class="tool-btn">
+          <button class="tool-btn" onclick="formatNote('bold')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/>
             </svg>
             Bold
           </button>
-          <button class="tool-btn">
+          <button class="tool-btn" onclick="formatNote('list')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/>
               <line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/>
@@ -1218,13 +1144,13 @@
             </svg>
             List
           </button>
-          <button class="tool-btn">
+          <button class="tool-btn" id="aiFillBtn" onclick="aiFillNotes()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
             </svg>
             AI Fill
           </button>
-          <button class="tool-btn">
+          <button class="tool-btn" onclick="exportNotes()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
               <polyline points="7 10 12 15 17 10"/>
@@ -1233,16 +1159,14 @@
             Export
           </button>
         </div>
-        <textarea class="notes-area" placeholder="Start taking notes… or click AI Fill to auto-generate structured notes from the video."></textarea>
+        <textarea class="notes-area" id="notesArea" placeholder="Start taking notes… or click AI Fill to auto-generate structured notes from the video."></textarea>
       </div>
 
       <!-- TRANSCRIPT TAB -->
       <div class="tab-content" id="tab-transcript">
-        <div class="section-block">
+        <div class="section-block" id="transcriptContent">
           <div class="section-block-title">Auto-Generated Transcript</div>
-          <p style="margin-bottom:12px">Welcome back everyone. Today we're going to dive deep into the Transformer architecture, which is really the backbone of everything happening in modern AI...</p>
-          <p style="margin-bottom:12px">So let's start with why we even needed something new. Recurrent neural networks had a fundamental problem — they process tokens sequentially, one after another. That means you can't parallelize the computation...</p>
-          <p>The key insight of the Transformer paper is remarkably elegant: what if instead of processing tokens one by one, we let every token attend to every other token simultaneously? This is the self-attention mechanism...</p>
+          <p style="color:var(--dim)">Transcript will load when you switch to this tab.</p>
         </div>
       </div>
 
@@ -1365,8 +1289,9 @@
 
 <script>
 
-  const sessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+  let sessionId = null;
   let isReady = false;
+  let transcriptLoaded = false;
 
   async function openApp() {
     const raw = document.getElementById('urlInput').value.trim();
@@ -1379,10 +1304,10 @@
     analyzeBtn.disabled = true;
 
     try {
-        const response = await fetch("/api/load", {
+        const response = await fetch("/load-video", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ url: url, session_id: sessionId })
+            body: JSON.stringify({ url: url })
         });
         
         const data = await response.json();
@@ -1395,7 +1320,78 @@
         document.getElementById('displayUrl').textContent = url.replace(/^https?:\/\//,'');
         document.getElementById('landing').classList.add('hidden');
         document.getElementById('app').classList.remove('hidden');
+        sessionId = data.session_id;
         isReady = true;
+
+        // ── Populate sidebar: embed YouTube video ──
+        const videoId = data.video_id;
+        const thumbContainer = document.getElementById('videoThumbContainer');
+        thumbContainer.innerHTML = `<iframe
+          width="100%" height="100%"
+          src="https://www.youtube.com/embed/${videoId}"
+          frameborder="0"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen
+          style="border-radius:8px;"></iframe>`;
+
+        // Set video title from summary if available
+        const titleEl = document.getElementById('videoTitle');
+        titleEl.textContent = data.title || url.replace(/^https?:\/\//, '');
+        const channelEl = document.getElementById('videoChannel');
+        channelEl.textContent = data.detected_language !== 'en'
+          ? `Translated from ${data.detected_language}`
+          : '';
+
+        // ── Populate sidebar: chapters ──
+        const chapterList = document.getElementById('chapterList');
+        if (data.chapters && data.chapters.length > 0) {
+            chapterList.innerHTML = '';
+            data.chapters.forEach((ch, i) => {
+                const item = document.createElement('a');
+                item.className = 'chapter-item' + (i === 0 ? ' active' : '');
+                item.href = `https://www.youtube.com/watch?v=${videoId}&t=${ch.time}s`;
+                item.target = '_blank';
+                item.style.textDecoration = 'none';
+                item.innerHTML = `
+                  <span class="chapter-ts">${ch.label}</span>
+                  <span class="chapter-name">${ch.name}</span>`;
+                item.addEventListener('click', () => {
+                  chapterList.querySelectorAll('.chapter-item').forEach(c => c.classList.remove('active'));
+                  item.classList.add('active');
+                });
+                chapterList.appendChild(item);
+            });
+        }
+
+        // ── Populate Summary tab ──
+        document.getElementById('summaryTitle').textContent = data.title || 'Video Summary';
+        document.getElementById('summaryOverview').textContent = data.summary || 'No summary available.';
+        document.getElementById('summaryWhyItMatters').textContent = data.why_it_matters || '';
+        const kcContainer = document.getElementById('summaryKeyConcepts');
+        kcContainer.innerHTML = '';
+        if (data.key_concepts && data.key_concepts.length > 0) {
+            data.key_concepts.forEach(concept => {
+                const kp = document.createElement('div');
+                kp.className = 'key-point';
+                kp.innerHTML = `<span class="key-point-dot"></span> ${concept}`;
+                kcContainer.appendChild(kp);
+            });
+        }
+
+        // ── Reset other tabs for fresh session ──
+        document.getElementById('quizContent').innerHTML = `
+          <div style="text-align:center; padding:40px 20px;">
+            <button class="chip primary" id="generateQuizBtn" onclick="generateQuiz()" style="font-size:14px; padding:10px 24px; cursor:pointer;">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              Generate Quiz
+            </button>
+          </div>`;
+        document.getElementById('quizSubtitle').textContent = 'Click below to generate a quiz based on this video.';
+        document.getElementById('notesArea').value = '';
+        transcriptLoaded = false;
+        document.getElementById('transcriptContent').innerHTML = `
+          <div class="section-block-title">Auto-Generated Transcript</div>
+          <p style="color:var(--dim)">Transcript will load when you switch to this tab.</p>`;
 
         // Clear existing messages and append greeting
         const msgs = document.getElementById('messages');
@@ -1422,12 +1418,329 @@
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
     document.getElementById('tab-' + id).classList.add('active');
+    // Lazy-load transcript on first tab switch
+    if (id === 'transcript' && !transcriptLoaded && sessionId) {
+      loadTranscript();
+    }
   }
 
   function selectOption(el) {
     const parent = el.closest('.options');
     parent.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
     el.classList.add('selected');
+
+    // Check answer
+    const card = el.closest('.question-card');
+    const correct = card.dataset.correct;
+    const letter = el.querySelector('.option-letter').textContent.trim();
+    if (correct) {
+      if (letter === correct) {
+        el.style.borderColor = '#22c55e';
+        el.style.background = 'rgba(34,197,94,0.08)';
+      } else {
+        el.style.borderColor = '#ef4444';
+        el.style.background = 'rgba(239,68,68,0.08)';
+        // Highlight correct
+        parent.querySelectorAll('.option').forEach(o => {
+          if (o.querySelector('.option-letter').textContent.trim() === correct) {
+            o.style.borderColor = '#22c55e';
+            o.style.background = 'rgba(34,197,94,0.08)';
+          }
+        });
+      }
+    }
+  }
+
+  // ── QUIZ GENERATION ──
+  async function generateQuiz() {
+    if (!sessionId) return;
+    const btn = document.getElementById('generateQuizBtn');
+    if (btn) btn.textContent = 'Generating…';
+    if (btn) btn.disabled = true;
+
+    try {
+      const response = await fetch("/generate-quiz", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Failed to generate quiz.");
+
+      const quiz = data.quiz;
+      if (!quiz || quiz.length === 0) {
+        document.getElementById('quizContent').innerHTML = '<p style="color:var(--dim);padding:20px;">Could not generate quiz. Try again.</p>';
+        return;
+      }
+
+      document.getElementById('quizSubtitle').textContent =
+        `${quiz.length} questions · Based on video content · Estimated ${quiz.length} min`;
+
+      let html = '';
+      quiz.forEach((q, i) => {
+        const letters = ['A', 'B', 'C', 'D'];
+        let optionsHtml = '';
+        letters.forEach(letter => {
+          if (q.options[letter]) {
+            optionsHtml += `
+              <div class="option" onclick="selectOption(this)">
+                <span class="option-letter">${letter}</span>
+                ${q.options[letter]}
+              </div>`;
+          }
+        });
+        html += `
+          <div class="question-card" data-correct="${q.correct}">
+            <div class="question-num">Q${i + 1} of ${quiz.length}</div>
+            <div class="question-text">${q.question}</div>
+            <div class="options">${optionsHtml}</div>
+            <div class="explanation" style="display:none; margin-top:10px; padding:10px; background:rgba(255,255,255,0.03); border-radius:8px; font-size:12.5px; color:var(--muted);">
+              💡 ${q.explanation}
+            </div>
+          </div>`;
+      });
+      document.getElementById('quizContent').innerHTML = html;
+
+    } catch (err) {
+      document.getElementById('quizContent').innerHTML =
+        `<p style="color:var(--accent);padding:20px;">Error: ${err.message}</p>`;
+    }
+  }
+
+  // ── TRANSCRIPT LOADING ──
+  async function loadTranscript() {
+    if (!sessionId) return;
+    const container = document.getElementById('transcriptContent');
+    container.innerHTML = `
+      <div class="section-block-title">Auto-Generated Transcript</div>
+      <p style="color:var(--dim)">Loading transcript…</p>`;
+
+    try {
+      const response = await fetch(`/transcript/${sessionId}`);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Failed to load transcript.");
+
+      const rawItems = data.transcript;
+      let html = '<div class="section-block-title">Auto-Generated Transcript</div>';
+
+      if (Array.isArray(rawItems) && rawItems.length > 0) {
+        // Group into ~60s paragraphs
+        let currentParagraph = [];
+        let paragraphStart = 0;
+
+        const getVal = (obj, key) => typeof obj === 'object' ? (obj[key] !== undefined ? obj[key] : obj) : obj;
+
+        rawItems.forEach((item, idx) => {
+          const text = getVal(item, 'text') || '';
+          const start = getVal(item, 'start') || 0;
+
+          if (currentParagraph.length === 0) paragraphStart = start;
+          currentParagraph.push(text);
+
+          if (start - paragraphStart >= 60 || idx === rawItems.length - 1) {
+            const m = Math.floor(paragraphStart / 60);
+            const s = Math.floor(paragraphStart % 60);
+            const ts = `${m}:${s.toString().padStart(2, '0')}`;
+            html += `
+              <div style="margin-bottom:16px; display:flex; gap:12px;">
+                <span style="font-family:var(--mono); font-size:11px; color:var(--accent); min-width:42px; padding-top:2px; flex-shrink:0;">${ts}</span>
+                <p style="margin:0; line-height:1.6; color:var(--muted);">${currentParagraph.join(' ')}</p>
+              </div>`;
+            currentParagraph = [];
+          }
+        });
+      } else {
+        html += '<p style="color:var(--dim)">No transcript data available.</p>';
+      }
+
+      container.innerHTML = html;
+      transcriptLoaded = true;
+
+    } catch (err) {
+      container.innerHTML = `
+        <div class="section-block-title">Auto-Generated Transcript</div>
+        <p style="color:var(--accent)">Error: ${err.message}</p>`;
+    }
+  }
+
+  // ── AI FILL NOTES ──
+  async function aiFillNotes() {
+    if (!sessionId) return;
+    const btn = document.getElementById('aiFillBtn');
+    const area = document.getElementById('notesArea');
+    btn.textContent = 'Generating…';
+    btn.disabled = true;
+    area.value = 'Generating AI notes… please wait.';
+
+    try {
+      const response = await fetch("/generate-notes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId })
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.detail || "Failed to generate notes.");
+      area.value = data.notes || 'No notes generated.';
+    } catch (err) {
+      area.value = 'Error generating notes: ' + err.message;
+    } finally {
+      btn.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> AI Fill`;
+      btn.disabled = false;
+    }
+  }
+
+  // ── NOTES HELPERS ──
+  function formatNote(type) {
+    const area = document.getElementById('notesArea');
+    const start = area.selectionStart;
+    const end = area.selectionEnd;
+    const selected = area.value.substring(start, end);
+    let replacement = selected;
+    if (type === 'bold') replacement = `**${selected}**`;
+    if (type === 'list') replacement = selected.split('\n').map(l => `• ${l}`).join('\n');
+    area.value = area.value.substring(0, start) + replacement + area.value.substring(end);
+  }
+
+  function exportNotes() {
+    const area = document.getElementById('notesArea');
+    const text = area.value.trim();
+    if (!text) { alert('No notes to export!'); return; }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const pageW = doc.internal.pageSize.getWidth();
+    const pageH = doc.internal.pageSize.getHeight();
+    const marginL = 18, marginR = 18, marginTop = 25;
+    const usableW = pageW - marginL - marginR;
+    let y = marginTop;
+
+    function addPageHeader() {
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, 0, pageW, 18, 'F');
+      doc.setFillColor(220, 38, 38);
+      doc.rect(0, 17.5, pageW, 0.5, 'F');
+      doc.setTextColor(220, 38, 38);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(11);
+      doc.text('VIDMIND AI', marginL, 12);
+      doc.setTextColor(180, 180, 180);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text('Study Notes Export', pageW - marginR, 12, { align: 'right' });
+    }
+
+    function addPageFooter(pgNum) {
+      doc.setDrawColor(60, 60, 60);
+      doc.line(marginL, pageH - 12, pageW - marginR, pageH - 12);
+      doc.setTextColor(120, 120, 120);
+      doc.setFontSize(7);
+      doc.text('Generated by VidMind AI — vidmind.app', marginL, pageH - 7);
+      doc.text('Page ' + pgNum, pageW - marginR, pageH - 7, { align: 'right' });
+    }
+
+    function checkPage() {
+      if (y > pageH - 20) {
+        addPageFooter(doc.getNumberOfPages());
+        doc.addPage();
+        addPageHeader();
+        y = marginTop + 5;
+      }
+    }
+
+    addPageHeader();
+    y = marginTop + 3;
+
+    const lines = text.split('\n');
+    lines.forEach(line => {
+      checkPage();
+      const trimmed = line.trimStart();
+
+      // Main heading: # Title
+      if (/^# /.test(trimmed)) {
+        y += 4;
+        doc.setTextColor(220, 38, 38);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(16);
+        const heading = trimmed.replace(/^#+ /, '').replace(/\*\*/g, '');
+        doc.text(heading, marginL, y);
+        y += 3;
+        doc.setDrawColor(220, 38, 38);
+        doc.line(marginL, y, marginL + doc.getTextWidth(heading), y);
+        y += 7;
+      }
+      // Sub-heading: ## Section
+      else if (/^## /.test(trimmed)) {
+        y += 3;
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text(trimmed.replace(/^#+ /, '').replace(/\*\*/g, ''), marginL, y);
+        y += 6;
+      }
+      // Sub-sub heading: ### 
+      else if (/^### /.test(trimmed)) {
+        y += 2;
+        doc.setTextColor(80, 80, 80);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(10);
+        doc.text(trimmed.replace(/^#+ /, '').replace(/\*\*/g, ''), marginL, y);
+        y += 5;
+      }
+      // Bullet points: - or •
+      else if (/^[-•*] /.test(trimmed)) {
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        const bulletText = trimmed.replace(/^[-•*] /, '').replace(/\*\*/g, '');
+        const wrapped = doc.splitTextToSize(bulletText, usableW - 8);
+        doc.setTextColor(220, 38, 38);
+        doc.text('●', marginL + 2, y);
+        doc.setTextColor(50, 50, 50);
+        wrapped.forEach((wl, wi) => {
+          checkPage();
+          doc.text(wl, marginL + 8, y);
+          y += 4.5;
+        });
+        y += 1;
+      }
+      // Table row: | col | col |
+      else if (/^\|/.test(trimmed)) {
+        if (/^\|[-:\s|]+\|$/.test(trimmed)) return; // skip separator rows
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(8.5);
+        const cells = trimmed.split('|').filter(c => c.trim());
+        const cellW = usableW / cells.length;
+        cells.forEach((cell, ci) => {
+          doc.text(cell.trim().replace(/\*\*/g, ''), marginL + ci * cellW + 2, y);
+        });
+        y += 5;
+      }
+      // Empty line
+      else if (trimmed === '') {
+        y += 3;
+      }
+      // Normal text
+      else {
+        doc.setTextColor(50, 50, 50);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(9.5);
+        const cleanText = trimmed.replace(/\*\*/g, '');
+        const wrapped = doc.splitTextToSize(cleanText, usableW);
+        wrapped.forEach(wl => {
+          checkPage();
+          doc.text(wl, marginL, y);
+          y += 4.5;
+        });
+        y += 1;
+      }
+    });
+
+    addPageFooter(doc.getNumberOfPages());
+
+    const videoTitle = document.getElementById('summaryTitle')?.textContent || 'VidMind_Notes';
+    const safeName = videoTitle.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 40);
+    doc.save(`${safeName}_Notes.pdf`);
   }
 
   function fillPrompt(btn) {
@@ -1473,18 +1786,29 @@
     msgs.appendChild(userMsg);
   }
 
-  function appendAiMessage(text, timeStr) {
+  function appendAiMessage(text, timeStr, timestamps = []) {
     if (!timeStr) {
         timeStr = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
     }
     const msgs = document.getElementById('messages');
     const aiMsg = document.createElement('div');
     aiMsg.className = 'msg ai';
+    
+    // Build timestamps HTML
+    let tsHtml = '';
+    if (timestamps && timestamps.length > 0) {
+        tsHtml = '<div style="margin-top:10px; display:flex; gap:6px; flex-wrap:wrap;">';
+        timestamps.forEach(ts => {
+            tsHtml += `<a href="https://www.youtube.com/watch?v=${ts.video_id}&t=${ts.time}s" target="_blank" style="display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; font-family:var(--mono); color:var(--accent); background:rgba(255,0,0,0.08); border:1px solid rgba(255,0,0,0.2); padding:4px 12px; border-radius:20px; text-decoration:none; transition:all 0.15s;" onmouseover="this.style.background='var(--accent)'; this.style.color='#fff';" onmouseout="this.style.background='rgba(255,0,0,0.08)'; this.style.color='var(--accent)';">▶ ${ts.label}</a>`;
+        });
+        tsHtml += '</div>';
+    }
+
     aiMsg.innerHTML = `
       <div class="msg-avatar">VM</div>
       <div class="msg-content">
         <div class="msg-meta"><span class="msg-name">VidMind AI</span><span class="msg-time">${timeStr}</span></div>
-        <div class="bubble">${formatAiText(text)}</div>
+        <div class="bubble">${formatAiText(text)}${tsHtml}</div>
       </div>
     `;
     msgs.appendChild(aiMsg);
@@ -1536,7 +1860,7 @@
     showTyping();
 
     try {
-        const response = await fetch("/api/chat", {
+        const response = await fetch("/chat", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ question: text, session_id: sessionId })
@@ -1549,7 +1873,7 @@
             throw new Error(data.detail || "Failed to get response.");
         }
         
-        appendAiMessage(data.answer, now);
+        appendAiMessage(data.answer, now, data.timestamps);
 
     } catch (err) {
         removeTyping();
