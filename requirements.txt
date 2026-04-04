@@ -25,3 +25,9 @@ reportlab
 
 # Utils
 requests
+fastapi
+uvicorn
+youtube-transcript-api
+yt-dlp
+fpdf2
+reportlab
