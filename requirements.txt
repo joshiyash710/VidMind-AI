@@ -1,28 +1,27 @@
 # Core FastAPI
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-python-dotenv==1.0.0
-pydantic==2.5.3
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
 
-# LangChain
-langchain==0.1.0
-langchain-openai==0.0.2
-langchain-community==0.0.10
-langchain-core==0.1.10
-openai==1.7.2
+# LangChain (let it resolve internally)
+langchain
+langchain-community
+langchain-openai
+openai
 
-# Vector Store & Embeddings
-faiss-cpu==1.7.4
+# Remove FAISS (causes deployment issues)
+# faiss-cpu
 
 # Text Processing
-langchain-text-splitters==0.0.1
+langchain-text-splitters
 
 # YouTube
-youtube-transcript-api==0.6.2
+youtube-transcript-api
 
-# PDF Generation
-fpdf2==2.7.6
-reportlab==4.0.7
+# PDF
+fpdf2
+reportlab
 
-# Optional but recommended
-requests==2.31.0
+# Utils
+requests
