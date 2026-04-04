@@ -865,7 +865,7 @@
       border-radius: 8px;
       padding: 10px;
       color: #fff;
-      background: rgba(255,255,255,0.05);
+      background: rgba(255, 255, 255, 0.05);
       font-size: 14px;
       resize: vertical;
     }
@@ -1573,7 +1573,8 @@
         <div class="tab-content active" id="tab-summary">
           <div class="summary-header">
             <h2 class="summary-title" id="summaryTitle">Loading summary…</h2>
-            <div style="margin-top: 6px; color: var(--dim); font-size: 13px;" id="summaryVideoInfo">Videos loaded: 0</div>
+            <div style="margin-top: 6px; color: var(--dim); font-size: 13px;" id="summaryVideoInfo">Videos loaded: 0
+            </div>
             <div class="action-chips">
               <button class="chip primary">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -1588,7 +1589,8 @@
                 </svg>
                 Add Video
               </button>
-              <button class="chip" onclick="toggleCrossVideoMode()" id="crossVideoBtn" title="Toggle cross-video QA mode">
+              <button class="chip" onclick="toggleCrossVideoMode()" id="crossVideoBtn"
+                title="Toggle cross-video QA mode">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <path d="M8 17l4-4 4 4" />
                   <path d="M8 7l4 4 4-4" />
@@ -1602,14 +1604,16 @@
                 </svg>
                 Export Chat
               </button>
-              <button class="chip" onclick="startExamMode()" id="examModeBtn" title="Generate an optimized exam study plan">
+              <button class="chip" onclick="startExamMode()" id="examModeBtn"
+                title="Generate an optimized exam study plan">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <circle cx="12" cy="12" r="10" />
                   <polyline points="12 6 12 12 16 14" />
                 </svg>
                 Exam Mode
               </button>
-              <button class="chip" onclick="exitExamMode()" id="exitExamModeBtn" title="Exit exam mode when ready" disabled style="display:none;">
+              <button class="chip" onclick="exitExamMode()" id="exitExamModeBtn" title="Exit exam mode when ready"
+                disabled style="display:none;">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                   <line x1="18" y1="6" x2="6" y2="18" />
                   <line x1="6" y1="6" x2="18" y2="18" />
@@ -1826,11 +1830,13 @@
     </div><!-- /layout -->
   </div><!-- /app -->
 
-<div id="themedModalOverlay" class="themed-modal-overlay" role="dialog" aria-modal="true" aria-labelledby="themedModalTitle">
+  <div id="themedModalOverlay" class="themed-modal-overlay" role="dialog" aria-modal="true"
+    aria-labelledby="themedModalTitle">
     <div class="themed-modal" id="themedModal">
       <div id="themedModalText" style="margin-bottom: 16px; font-size: 15px; line-height: 1.4;"></div>
       <div id="themedModalInputWrapper" style="display:none; margin-bottom: 16px;">
-        <input id="themedModalInput" type="text" style="width:100%; padding:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px;" />
+        <input id="themedModalInput" type="text"
+          style="width:100%; padding:10px; border:1px solid var(--border); background:var(--surface); color:var(--text); border-radius:8px;" />
       </div>
       <div style="display:flex; justify-content:flex-end;">
         <button id="themedModalCancel" class="secondary" style="display:none;">Cancel</button>
@@ -2609,8 +2615,8 @@
             <span>Q${index + 1}</span>
             <span style="font-size: 12px; color: var(--dim);">
               ${timeSpent}s ${isCorrect ?
-                '<span style="color: #22c55e;">✓ Correct</span>' :
-                '<span style="color: #ef4444;">✗ Incorrect</span>'}
+            '<span style="color: #22c55e;">✓ Correct</span>' :
+            '<span style="color: #ef4444;">✗ Incorrect</span>'}
             </span>
           </div>
           <div class="question-text">${q.question}</div>
