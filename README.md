@@ -1,261 +1,293 @@
 <div align="center">
-
-# 🎥 VidMind AI
-
-### *Turn any YouTube video into an intelligent conversation*
-
-[![Python](https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://python.org)
-[![LangChain](https://img.shields.io/badge/LangChain-🦜-1C3C3C?style=for-the-badge)](https://langchain.com)
-[![OpenAI](https://img.shields.io/badge/OpenAI-GPT--4o--mini-412991?style=for-the-badge&logo=openai&logoColor=white)](https://openai.com)
-[![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
-[![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)](https://streamlit.io)
-[![FAISS](https://img.shields.io/badge/FAISS-Vector_Search-blue?style=for-the-badge)](https://faiss.ai)
-
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,30&height=220&section=header&text=VidMind%20AI&fontSize=80&fontColor=ffffff&animation=fadeIn&fontAlignY=40&desc=Learn%20What%20Matters.%20Faster.&descAlignY=62&descSize=22" width="100%"/>
 <br/>
-
-> **Paste a YouTube URL. Ask anything. Get instant, context-aware answers — grounded 100% in the video.**
-
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white"/>
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white"/>
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white"/>
+  <img src="https://img.shields.io/badge/LangChain-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white"/>
+  <img src="https://img.shields.io/badge/OpenAI-412991?style=for-the-badge&logo=openai&logoColor=white"/>
+  <img src="https://img.shields.io/badge/FAISS-00BFFF?style=for-the-badge&logo=meta&logoColor=white"/>
+</p>
+<p align="center">
+  <img src="https://img.shields.io/badge/Hackathon-OceanLab_×_CHARUSAT_Hacks_2026-blue?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Team-ReACTors-crimson?style=flat-square"/>
+  <img src="https://img.shields.io/badge/Built_in-48_Hours-orange?style=flat-square"/>
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square"/>
+</p>
 <br/>
-
+> **Paste a YouTube URL. Get a context-aware AI tutor, instant summaries, smart quizzes, and a full learning workspace — all grounded strictly in the video.**
+<br/>
+🧠 What is VidMind? · ✨ Features · 🏗️ Architecture · ⚙️ Setup · 🖥️ Two Interfaces · 📁 Project Structure · 🧑‍💻 Team
 </div>
-
 ---
-
-## ✨ What is VidMind AI?
-
-**VidMind AI** is an intelligent YouTube video Q&A chatbot powered by **Retrieval-Augmented Generation (RAG)**. It automatically fetches a video's transcript, embeds it into a vector store, and lets you have a natural, memory-aware conversation about the video content — all powered by OpenAI's GPT-4o-mini.
-
-Whether you want to extract key insights from a lecture, get a quick summary of a long tutorial, or deep-dive into a documentary without watching the whole thing — VidMind AI has you covered.
-
+🧠 What is VidMind AI?
+YouTube has billions of hours of educational content — but passive watching doesn't equal learning. VidMind AI transforms any YouTube video into an interactive, AI-powered learning session.
+Paste a URL, and VidMind automatically fetches the transcript, chunks and embeds it into a local FAISS vector store, then builds a retrieval-augmented generation (RAG) chain with persistent conversation memory. The result: an AI that answers questions about the video with pinpoint accuracy, never hallucinating beyond the source content.
+Built in 48 hours at OceanLab × CHARUSAT Hacks 2026 by Team ReACTors.
 ---
-
-## 🚀 Features
-
-| Feature | Description |
-|---|---|
-| 🔗 **YouTube Transcript Extraction** | Auto-fetches transcripts directly from any YouTube URL |
-| 🧠 **RAG-Powered Q&A** | Retrieves the most relevant transcript chunks before answering |
-| 💬 **Conversation Memory** | Maintains full chat history within a session — ask follow-up questions naturally |
-| ⚡ **Dual Frontend Support** | Run as a sleek **Streamlit** app or a full **FastAPI + HTML** web app |
-| 🔍 **FAISS Vector Search** | Semantically searches the transcript for the most relevant context |
-| 🎯 **Grounded Answers** | Responses are strictly based on the video transcript — no hallucinations |
-
+✨ Features
+Feature	Description
+💬 Context-Aware Q&A	Ask anything about the video. The LLM answers only using transcript content — zero hallucination.
+🧠 Conversation Memory	Full multi-turn chat with `RunnableWithMessageHistory` — the AI remembers everything discussed in the session.
+🔍 FAISS Semantic Search	Transcript is chunked (1000 chars, 200 overlap), embedded with `text-embedding-ada-002`, and stored in FAISS for top-k=4 retrieval.
+📊 Summary & Key Points UI	Rich learning workspace with summary, chapters, and key concept cards in the custom HTML frontend.
+📝 Smart Notes Panel	In-app notes editor with toolbar — take notes alongside your video-grounded AI conversation.
+🎯 Interactive Quiz Tab	Built-in MCQ quiz UI in the frontend for active recall and self-testing.
+🖥️ Dual Interface	Run as a Streamlit app for rapid use, or a full FastAPI + custom HTML web app for the complete experience.
+🎨 YouTube-native Design	Custom dark-mode UI with `DM Sans`, `Bebas Neue`, and a full YouTube-inspired red-on-black design system.
 ---
-
-## 🏗️ Architecture
-
+🏗️ Architecture
 ```
-YouTube URL
-     │
-     ▼
-┌─────────────────────┐
-│  YouTube Transcript  │  ← youtube-transcript-api
-│       API            │
-└────────┬────────────┘
-         │  Raw transcript text
-         ▼
-┌─────────────────────┐
-│  Text Splitter       │  ← RecursiveCharacterTextSplitter
-│  (chunks: 1000 tok)  │     chunk_overlap: 200
-└────────┬────────────┘
-         │  Document chunks
-         ▼
-┌─────────────────────┐
-│  OpenAI Embeddings   │  ← text-embedding-ada-002
-│  + FAISS Vectorstore │
-└────────┬────────────┘
-         │  Semantic retrieval (top-4 chunks)
-         ▼
-┌──────────────────────────────┐
-│  LangChain RAG Chain          │
-│  ┌────────────────────────┐  │
-│  │  ChatPromptTemplate    │  │  ← System: "Answer ONLY using transcript"
-│  │  + MessagesPlaceholder │  │  ← Full conversation history injected
-│  └────────────┬───────────┘  │
-│               │               │
-│  ┌────────────▼───────────┐  │
-│  │  GPT-4o-mini (LLM)     │  │
-│  └────────────────────────┘  │
-└──────────────┬───────────────┘
-               │  Answer
-               ▼
-         User Interface
-      (Streamlit / FastAPI)
+┌──────────────────────────────────────────────────────────────────────┐
+│                         VidMind AI — System Flow                     │
+│                                                                      │
+│   User Input: YouTube URL                                            │
+│        │                                                             │
+│        ▼                                                             │
+│   ┌─────────────────────────────────────────────────────────────┐   │
+│   │              youtube_chatbot.py  (Core Engine)              │   │
+│   │                                                             │   │
+│   │  get_video_id()  →  get_transcript()                        │   │
+│   │                          │                                  │   │
+│   │                   YouTubeTranscriptApi                      │   │
+│   │                   (fetches English transcript)              │   │
+│   │                          │                                  │   │
+│   │            RecursiveCharacterTextSplitter                   │   │
+│   │            (chunk_size=1000, overlap=200)                   │   │
+│   │                          │                                  │   │
+│   │            OpenAIEmbeddings (text-embedding-ada-002)        │   │
+│   │                          │                                  │   │
+│   │            FAISS VectorStore → Retriever (top-k=4)          │   │
+│   │                          │                                  │   │
+│   │            RunnableParallel                                 │   │
+│   │            ├─ context  → retrieved chunks                   │   │
+│   │            ├─ question → passthrough                        │   │
+│   │            └─ history  → session memory                     │   │
+│   │                          │                                  │   │
+│   │            ChatPromptTemplate → GPT-4o-mini                 │   │
+│   │                          │                                  │   │
+│   │            RunnableWithMessageHistory (InMemoryHistory)     │   │
+│   └─────────────────────────────────────────────────────────────┘   │
+│              │                              │                        │
+│              ▼                              ▼                        │
+│   ┌──────────────────┐          ┌──────────────────────────┐        │
+│   │    app.py        │          │       server.py           │        │
+│   │   (Streamlit)    │          │  (FastAPI + static HTML)  │        │
+│   │   Port: 8501     │          │  POST /api/load           │        │
+│   └──────────────────┘          │  POST /api/chat           │        │
+│                                 │  Port: 8000               │        │
+│                                 └──────────────────────────┘        │
+│                                              │                       │
+│                                   static/index.html                  │
+│                                   (Custom YouTube-style UI)          │
+└──────────────────────────────────────────────────────────────────────┘
 ```
-
+Tech Stack
+Layer	Technology
+LLM	OpenAI `gpt-4o-mini` via `langchain-openai`
+Embeddings	OpenAI `text-embedding-ada-002`
+Vector Store	FAISS (`faiss-cpu`)
+RAG Chain	LangChain `RunnableParallel` + `ChatPromptTemplate` + `StrOutputParser`
+Memory	`RunnableWithMessageHistory` with custom `InMemoryHistory` (per `session_id`)
+Transcript API	`youtube-transcript-api` (English, auto-fetched)
+Interface A	Streamlit (`app.py`)
+Interface B	FastAPI + Uvicorn (`server.py`) serving static HTML/CSS/JS
+Frontend UI	Custom single-file `vidmind.html` / `static/index.html`
+Env Management	`python-dotenv`
 ---
-
-## 📁 Project Structure
-
-```
-VidMind-AI/
-│
-├── youtube_chatbot.py   # 🧠 Core RAG engine — transcript fetch, embeddings, chain builder
-├── app.py               # 🎨 Streamlit frontend (simple, standalone UI)
-├── server.py            # ⚡ FastAPI backend — REST API with session management
-├── vidmind.html         # 🌐 Custom HTML frontend (served via FastAPI)
-├── static/              # 📂 Static assets for the web frontend
-├── requirements.txt     # 📦 Python dependencies
-└── .gitignore
-```
-
----
-
-## 🛠️ Tech Stack
-
-| Layer | Technology |
-|---|---|
-| **LLM** | OpenAI GPT-4o-mini |
-| **Embeddings** | OpenAI `text-embedding-ada-002` |
-| **Orchestration** | LangChain + LangChain Core |
-| **Vector Store** | FAISS (Facebook AI Similarity Search) |
-| **Transcript** | `youtube-transcript-api` |
-| **UI (Option A)** | Streamlit |
-| **UI (Option B)** | FastAPI + Vanilla HTML/CSS/JS |
-| **Memory** | `RunnableWithMessageHistory` (in-memory) |
-
----
-
-## ⚙️ Getting Started
-
-### Prerequisites
-
-- Python 3.9+
-- An [OpenAI API Key](https://platform.openai.com/api-keys)
-
-### 1. Clone the Repository
-
+⚙️ Setup & Installation
+Prerequisites
+Python 3.10+
+An OpenAI API key
+1. Clone the Repository
 ```bash
 git clone https://github.com/joshiyash710/VidMind-AI.git
 cd VidMind-AI
 ```
-
-### 2. Create a Virtual Environment
-
-```bash
-python -m venv venv
-source venv/bin/activate      # macOS/Linux
-venv\Scripts\activate         # Windows
-```
-
-### 3. Install Dependencies
-
+2. Install Dependencies
 ```bash
 pip install -r requirements.txt
 ```
-
-> **Note:** The `requirements.txt` includes LangChain, FAISS, HuggingFace tools, and more. Also install these packages separately:
-> ```bash
-> pip install openai langchain-openai youtube-transcript-api fastapi uvicorn streamlit python-dotenv
-> ```
-
-### 4. Set Up Environment Variables
-
-Create a `.env` file in the project root:
-
+3. Configure Environment
+Create a `.env` file in the root directory:
 ```env
 OPENAI_API_KEY=your_openai_api_key_here
 ```
-
 ---
-
-## ▶️ Running the App
-
-### Option A — Streamlit UI (Quickest Start)
-
+🖥️ Two Ways to Run
+VidMind AI ships with two fully functional interfaces — pick whichever suits your workflow.
+---
+🅰️ Option 1 — Streamlit App
+The fastest way to get started. Clean, minimal UI for rapid testing.
 ```bash
 streamlit run app.py
 ```
-
-Then open your browser at `http://localhost:8501`
-
-### Option B — FastAPI + HTML Web App
-
+Open `http://localhost:8501` in your browser.
+Workflow:
+Paste a YouTube URL in the text input
+Click 📥 Load Transcript — VidMind fetches the transcript and builds the FAISS index (30–120s for longer videos)
+Ask questions in the chat input — the AI answers with full session memory
+---
+🅱️ Option 2 — FastAPI + Custom Web UI
+Full-stack web application with the polished YouTube-native dark-mode interface.
 ```bash
 python server.py
 ```
-
-Then open `http://127.0.0.1:8000` in your browser.
-
-The FastAPI backend exposes two endpoints:
-
-| Endpoint | Method | Description |
-|---|---|---|
-| `/api/load` | `POST` | Load transcript from a YouTube URL |
-| `/api/chat` | `POST` | Send a question and receive an AI answer |
-
+Or with uvicorn directly:
+```bash
+uvicorn server:app --host 127.0.0.1 --port 8000 --reload
+```
+Open `http://localhost:8000` in your browser.
+This serves the complete `static/index.html` frontend featuring:
+🎬 Landing page with animated hero, URL input, and stats
+📊 Full 3-column learning dashboard (Summary · Quiz · Notes tabs)
+💬 Real-time chat panel with quick-prompt chips and typing indicator
+🗂️ Sidebar with video metadata, thumbnail, and chapter navigation
+REST API
+Method	Endpoint	Body	Description
+`GET`	`/`	—	Serves the HTML frontend
+`POST`	`/api/load`	`{ "url": "...", "session_id": "..." }`	Fetches transcript, builds FAISS index, stores chain
+`POST`	`/api/chat`	`{ "question": "...", "session_id": "..." }`	Returns AI answer for the session
+Example — Load a video:
+```json
+POST /api/load
+{
+  "url": "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+  "session_id": "user-session-001"
+}
+```
+Example — Chat:
+```json
+POST /api/chat
+{
+  "question": "What is the main topic of this video?",
+  "session_id": "user-session-001"
+}
+```
 ---
-
-## 💡 How to Use
-
-1. **Paste** any YouTube video URL into the input field
-2. Click **"Load Transcript"** — the AI will fetch and index the video content
-3. **Ask anything** about the video in the chat box
-4. Get instant, grounded answers with full **conversation memory**
-
-> 🎯 *Example questions you can ask:*
-> - *"What is the main argument of this video?"*
-> - *"Summarize the key points mentioned after the 10-minute mark."*
-> - *"What did the speaker say about machine learning?"*
-
+📁 Project Structure
+```
+VidMind-AI/
+│
+├── youtube_chatbot.py      # ⭐ Core AI engine
+│                           #    - get_video_id(), get_transcript()
+│                           #    - InMemoryHistory, get_session_history()
+│                           #    - build_chain_with_history()
+│                           #    - FAISS + OpenAI RAG pipeline
+│
+├── app.py                  # Interface A: Streamlit UI (59 lines)
+│
+├── server.py               # Interface B: FastAPI server (83 lines)
+│                           #    - GET  /
+│                           #    - POST /api/load
+│                           #    - POST /api/chat
+│
+├── vidmind.html            # Standalone UI prototype (1411 lines)
+│                           # Full YouTube-style learning dashboard
+│
+├── static/
+│   └── index.html          # Production frontend served by FastAPI
+│
+├── requirements.txt        # All Python dependencies
+├── .gitignore
+└── README.md
+```
 ---
+🔬 How the RAG Pipeline Works
+```
+1. URL Parsing
+   └── get_video_id(url)
+       Parses ?v= param from any YouTube URL format
 
-## 🧩 Core Module — `youtube_chatbot.py`
+2. Transcript Fetching
+   └── get_transcript(video_id)
+       YouTubeTranscriptApi().fetch(video_id, languages=["en"])
+       Joins all segments into a single text string
 
-This is the brain of VidMind AI. Here's what it does:
+3. Chunking
+   └── RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+       Creates overlapping Document chunks to preserve context at boundaries
 
-- **`get_video_id(url)`** — Parses a YouTube URL and extracts the video ID
-- **`get_transcript(video_id)`** — Fetches the English transcript using `YouTubeTranscriptApi`
-- **`InMemoryHistory`** — A custom `BaseChatMessageHistory` implementation that stores conversation turns per session
-- **`build_chain_with_history(transcript)`** — The main builder that:
-  1. Splits the transcript into overlapping chunks
-  2. Embeds them with OpenAI embeddings into a FAISS index
-  3. Builds a `RunnableParallel` chain that retrieves context + injects history
-  4. Wraps everything in `RunnableWithMessageHistory` for session-aware conversations
+4. Embedding & Indexing
+   └── OpenAIEmbeddings(model="text-embedding-ada-002")
+       └── FAISS.from_documents(docs, embeddings)
+           └── retriever = vectorstore.as_retriever(search_kwargs={"k": 4})
 
+5. Chain Assembly
+   └── RunnableParallel({
+         "context":  lambda x → format_docs(retriever.invoke(x["question"])),
+         "question": lambda x → x["question"],
+         "history":  lambda x → x["history"]
+       })
+       | ChatPromptTemplate([
+           ("system", "Answer ONLY using the transcript below.\n\n{context}"),
+           MessagesPlaceholder("history"),
+           ("human", "{question}")
+         ])
+       | ChatOpenAI(model="gpt-4o-mini", temperature=0.7)
+       | StrOutputParser()
+
+6. Memory Wrapping
+   └── RunnableWithMessageHistory(
+         chain,
+         get_session_history,          # Dict[session_id → InMemoryHistory]
+         input_messages_key="question",
+         history_messages_key="history"
+       )
+```
 ---
+📦 Full Dependency List
+```txt
+# LangChain
+langchain==1.2.4
+langchain-core==1.2.4
+langchain-community==0.2.19
+langchain-text-splitters==0.3.11
+langchain-openai
+langchain-huggingface==1.2.0
 
-## 🔒 Environment Variables
+# Embeddings & Vector Store
+huggingface-hub==0.36.0
+sentence-transformers
+faiss-cpu
 
-| Variable | Required | Description |
-|---|---|---|
-| `OPENAI_API_KEY` | ✅ Yes | Your OpenAI API key for GPT-4o-mini and embeddings |
+# YouTube Transcript
+youtube-transcript-api
 
+# Web Frameworks
+streamlit
+fastapi
+uvicorn
+
+# Utilities
+python-dotenv
+```
 ---
-
-## 🗺️ Roadmap
-
-- [ ] Support for multilingual transcripts
-- [ ] Timestamp-aware answers (cite the exact moment in the video)
-- [ ] Multi-video comparison mode
-- [ ] Persistent vector store (save and reload sessions)
-- [ ] Export Q&A as PDF/Markdown
-- [ ] Deploy to Streamlit Cloud / Railway / Render
-
----
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is open-source and available under the [MIT License](LICENSE).
-
----
-
+🧑‍💻 Team
 <div align="center">
-
-**Built by [Yash Joshi & Bansi Kanani(ReACTors)](https://github.com/joshiyash710)**
-
-*If you found this useful, please consider giving it a ⭐ on GitHub!*
-
+Built with ❤️ by Team ReACTors at OceanLab × CHARUSAT Hacks 2026
+	Name	Role	Links
+👨‍💻	Yash Hiren Joshi	Backend · LangChain RAG Pipeline · FastAPI · AI Architecture	![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white) ![Portfolio](https://img.shields.io/badge/Portfolio-FF5722?style=flat-square&logo=google-chrome&logoColor=white)
+👩‍💻	Bansi Deepak Kanani	Frontend · UI/UX Design · Integration	![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=flat-square&logo=linkedin&logoColor=white)
+Final-year B.Tech Information Technology students · DEPSTAR, CHARUSAT University, Anand, Gujarat
+</div>
+---
+🤝 Contributing
+Contributions, issues, and feature requests are welcome!
+```bash
+# Fork the repo, then:
+git checkout -b feature/your-feature-name
+git commit -m "feat: add your feature"
+git push origin feature/your-feature-name
+# Open a Pull Request
+```
+---
+📄 License
+This project is licensed under the MIT License — see the LICENSE file for details.
+---
+<div align="center">
+<img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=0,2,30&height=120&section=footer" width="100%"/>
+VidMind AI — Because great learning deserves great tools.
+⭐ If this project helped you, drop a star!
 </div>
