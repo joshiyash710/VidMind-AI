@@ -254,7 +254,7 @@ This project is open-source and available under the [MIT License](LICENSE).
 
 <div align="center">
 
-**Built with ❤️ by [Yash Joshi](https://github.com/joshiyash710)**
+**Built with by [Yash Joshi & Bansi Kanani(ReACTors)](https://github.com/joshiyash710)**
 
 *If you found this useful, please consider giving it a ⭐ on GitHub!*
 
