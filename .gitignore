@@ -1,5 +1,10 @@
 .env
 venv/
+.venv/
 __pycache__/
 *.pyc
 youtube_cookies.txt
+*.egg-info/
+dist/
+build/
+.gemini/

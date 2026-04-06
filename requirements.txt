@@ -4,20 +4,19 @@ uvicorn[standard]
 python-dotenv
 pydantic
 
-# LangChain (let it resolve internally)
+# LangChain + AI
 langchain
 langchain-community
 langchain-openai
+langchain-text-splitters
 openai
 
-# Remove FAISS (causes deployment issues)
-# faiss-cpu
-
-# Text Processing
-langchain-text-splitters
+# Vector Store
+faiss-cpu
 
 # YouTube
 youtube-transcript-api
+yt-dlp
 
 # PDF
 fpdf2
@@ -25,9 +24,3 @@ reportlab
 
 # Utils
 requests
-fastapi
-uvicorn
-youtube-transcript-api
-yt-dlp
-fpdf2
-reportlab
