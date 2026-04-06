@@ -1160,7 +1160,8 @@ Return ONLY valid JSON array — no markdown fences:
 def generate_exam_plan(transcript: str, topic: str, hours: float) -> dict:
     prompt = ChatPromptTemplate.from_messages([
         ("system", """You are an expert exam strategist.
-Create an optimized study plan.
+Create an optimized study plan based on the ACTUAL transcript content.
+Identify the IMPORTANT topics covered in the video, where they appear (approximate timestamps based on position in transcript), and their importance level for exams.
 
 Return ONLY valid JSON — no markdown fences:
 {{
@@ -1170,11 +1171,18 @@ Return ONLY valid JSON — no markdown fences:
       "title": "Topic Name",
       "duration_mins": 20,
       "concepts": ["concept1", "concept2"],
+      "importance": "High",
+      "video_timestamp": "2:30",
+      "video_section": "This topic is discussed around the 2-3 minute mark in the video",
       "checkpoint_question": "Quick verification question"
     }}
   ],
   "quick_tips": ["tip1", "tip2", "tip3"]
-}}"""),
+}}
+
+importance should be one of: "Critical", "High", "Medium", "Low"
+video_timestamp should be an approximate MM:SS timestamp based on the topic's position in the transcript.
+video_section should describe where in the video this topic appears."""),
         ("human", "Topic: {topic}\nHours Available: {hours}\n\nTranscript:\n{transcript}")
     ])
 

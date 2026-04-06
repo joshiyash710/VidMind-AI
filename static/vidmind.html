@@ -1212,7 +1212,7 @@
     }
 
     .layout.exam-mode {
-      grid-template-columns: 1fr 300px;
+      grid-template-columns: 1fr 300px 340px;
     }
 
     /* SIDEBAR */
@@ -1557,6 +1557,174 @@
     .tab.active .tab-badge {
       background: rgba(255, 0, 0, .12);
       color: var(--accent);
+    }
+
+    /* Quiz lock state — disables tabs and chat during quiz */
+    .tab.quiz-locked {
+      opacity: 0.35;
+      pointer-events: none;
+      cursor: not-allowed;
+    }
+
+    .chat-panel.quiz-locked {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    .quiz-lock-banner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(245, 158, 11, .08);
+      border: 1px solid rgba(245, 158, 11, .25);
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 12px;
+      color: var(--warning);
+      margin-bottom: 16px;
+    }
+
+    /* Report Card — matches project red/dark theme */
+    .report-card {
+      background: linear-gradient(135deg, rgba(255,0,0,.03) 0%, var(--surface) 100%);
+      border: 2px solid rgba(255,0,0,.2);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      margin-top: 24px;
+      animation: fadeUp .4s ease both;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .report-card::before {
+      content: '';
+      position: absolute;
+      top: -60px; right: -60px;
+      width: 120px; height: 120px;
+      background: radial-gradient(circle, rgba(255,0,0,.08) 0%, transparent 70%);
+      border-radius: 50%;
+    }
+
+    .report-card.excellent { border-color: rgba(34,197,94,.4); background: linear-gradient(135deg, rgba(34,197,94,.04) 0%, var(--surface) 100%); }
+    .report-card.good { border-color: rgba(255,0,0,.3); }
+    .report-card.average { border-color: rgba(245,158,11,.3); background: linear-gradient(135deg, rgba(245,158,11,.03) 0%, var(--surface) 100%); }
+    .report-card.poor { border-color: rgba(239,68,68,.3); background: linear-gradient(135deg, rgba(239,68,68,.03) 0%, var(--surface) 100%); }
+
+    .report-header {
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .report-emoji {
+      font-size: 52px;
+      margin-bottom: 8px;
+      filter: drop-shadow(0 4px 12px rgba(255,0,0,.2));
+    }
+
+    .report-title {
+      font-family: var(--display);
+      font-size: 28px;
+      letter-spacing: .08em;
+      color: var(--accent);
+      margin-bottom: 4px;
+    }
+
+    .report-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      letter-spacing: .04em;
+    }
+
+    .report-score-ring {
+      width: 130px;
+      height: 130px;
+      border-radius: 50%;
+      margin: 24px auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: rgba(255,0,0,.04);
+    }
+
+    .report-score-ring::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 5px solid var(--border);
+    }
+
+    .report-score-ring::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      border: 5px solid transparent;
+      border-top-color: var(--accent);
+      animation: spin 2s linear infinite;
+      opacity: .3;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .report-score-value {
+      font-family: var(--display);
+      font-size: 40px;
+      letter-spacing: .02em;
+      z-index: 1;
+    }
+
+    .report-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 24px 0;
+    }
+
+    .report-stat {
+      text-align: center;
+      padding: 14px 12px;
+      background: rgba(255,255,255,.02);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+    }
+
+    .report-stat-value {
+      font-family: var(--display);
+      font-size: 26px;
+      letter-spacing: .02em;
+    }
+
+    .report-stat-label {
+      font-size: 10px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-top: 4px;
+    }
+
+    .report-stat.correct .report-stat-value { color: #22c55e; }
+    .report-stat.wrong .report-stat-value { color: var(--accent); }
+    .report-stat.total .report-stat-value { color: var(--muted); }
+
+    .report-feedback {
+      background: rgba(255,0,0,.03);
+      border: 1px solid rgba(255,0,0,.1);
+      border-radius: var(--radius);
+      padding: 16px;
+      font-size: 13.5px;
+      color: var(--muted);
+      line-height: 1.7;
+      margin-top: 16px;
+    }
+
+    .report-actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 24px;
     }
 
     /* TAB CONTENT */
@@ -2576,22 +2744,6 @@
         <div class="tab-content active" id="tab-summary">
           <div class="summary-header">
             <h2 class="summary-title" id="summaryTitle">Loading…</h2>
-            <div class="action-chips">
-              <button class="chip primary" onclick="generateContent('notes')">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
-                </svg>
-                AI Notes
-              </button>
-              <button class="chip" onclick="exportNotes()">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                  <polyline points="7 10 12 15 17 10" />
-                  <line x1="12" y1="15" x2="12" y2="3" />
-                </svg>
-                Export PDF
-              </button>
-            </div>
           </div>
           <div class="section-block">
             <div class="section-block-title">Overview</div>
@@ -2617,8 +2769,8 @@
           </div>
           <div id="quizContent">
             <div class="question-card">
-              <div class="question-num">Generating quiz…</div>
-              <div class="question-text">Please wait.</div>
+              <div class="question-num">Quiz</div>
+              <div class="question-text">Click "Generate New Quiz" to start a knowledge check.</div>
             </div>
           </div>
           <div style="text-align:center;margin-top:20px;">
@@ -2634,13 +2786,13 @@
         <!-- NOTES TAB -->
         <div class="tab-content" id="tab-notes">
           <div class="notes-toolbar">
-            <button class="tool-btn" onclick="generateContent('notes')">
+            <button class="chip primary" onclick="generateContent('notes')">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
               </svg>
-              AI Fill
+              AI Notes
             </button>
-            <button class="tool-btn" onclick="exportNotes()">
+            <button class="chip" onclick="exportNotesPDF()">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
@@ -2657,7 +2809,7 @@
             </button>
           </div>
           <textarea class="notes-area" id="notesArea"
-            placeholder="Click 'AI Fill' to auto-generate structured notes from the video."></textarea>
+            placeholder="Click 'AI Notes' to auto-generate structured notes from the video."></textarea>
         </div>
 
         <!-- TRANSCRIPT TAB -->
@@ -2852,6 +3004,59 @@
               <div id="planProgressBar" style="height:100%;background:var(--accent);width:0%;transition:width .5s;">
               </div>
             </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- EXAM CHAT PANEL -->
+      <aside class="chat-panel" id="examChatPanel">
+        <div class="chat-header">
+          <div class="chat-header-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+          </div>
+          <div class="chat-header-text">
+            <div class="chat-header-title">AI Tutor</div>
+            <div class="chat-header-sub">Exam mode Q&amp;A</div>
+          </div>
+          <div class="chat-status">
+            <span class="chat-status-dot"></span>Online
+          </div>
+        </div>
+
+        <div class="messages" id="examMessages">
+          <div class="ts-chip">Today</div>
+          <div class="msg ai">
+            <div class="msg-avatar">VM</div>
+            <div class="msg-content">
+              <div class="msg-meta">
+                <span class="msg-name">VidMind AI</span>
+              </div>
+              <div class="bubble">
+                Hi! I'm your exam tutor. Ask me about any topic from the study plan,
+                or request explanations for concepts you find tricky.
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="quick-prompts">
+          <button class="quick-prompt" onclick="fillExamPrompt(this)">Explain this simply</button>
+          <button class="quick-prompt" onclick="fillExamPrompt(this)">Give me a mnemonic</button>
+          <button class="quick-prompt" onclick="fillExamPrompt(this)">What are common mistakes?</button>
+        </div>
+
+        <div class="chat-input-wrap">
+          <div class="chat-input-box">
+            <textarea class="chat-input" id="examChatInput" rows="1" placeholder="Ask your exam tutor…"
+              onkeydown="handleExamKey(event)" oninput="autoResize(this)"></textarea>
+            <button class="send-btn" id="examSendBtn" onclick="sendExamMessage()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
           </div>
         </div>
       </aside>
@@ -3343,7 +3548,8 @@
     /* ─── SELECT MODE ────────────────────────────────────── */
     async function selectMode(mode) {
       currentMode = mode;
-      showLoading('Setting up your workspace…', 'Connecting to knowledge base…');
+      const modeName = mode === 'deep_learn' ? 'Deep Learn' : 'Exam';
+      showLoading(`Activating ${modeName} Mode…`, `Preparing your ${modeName.toLowerCase()} workspace…`);
 
       try {
         const res = await fetch(`${API_BASE}/set-mode`, {
@@ -3422,7 +3628,7 @@
 
       updateChaptersUI(_pendingChapters);
       _loadTranscript();
-      generateContent('quiz');
+      _loadQuizSilent();
       loadConfusedTopics();
     }
 
@@ -3449,16 +3655,23 @@
     /* ─── SUMMARY UI ─────────────────────────────────────── */
     function updateSummaryUI(data) {
       if (!data) return;
+      // For multi-video: currentSummary is already the merged_summary object
+      // For single video: currentSummary is the full response data
       const merged = data.merged_summary || {};
-      document.getElementById('summaryTitle').textContent =
-        data.title || merged.title || 'Video Summary';
-      document.getElementById('summaryOverview').textContent =
-        data.summary || merged.summary || 'Analyzing video content…';
-      document.getElementById('whyItMatters').textContent =
-        data.why_it_matters || merged.why_it_matters ||
+      const title = data.title || merged.title || 'Video Summary';
+      const summary = data.summary || merged.summary || 'Analyzing video content…';
+      const whyMatters = data.why_it_matters || merged.why_it_matters ||
         'Understanding this helps in mastering key concepts.';
-
       const concepts = data.key_concepts || merged.key_concepts || [];
+
+      // Show combined badge if multiple videos
+      const isMulti = loadedVideos.length > 1;
+      document.getElementById('summaryTitle').innerHTML = _escapeHtml(title) +
+        (isMulti ? ' <span style="display:inline-block;font-size:10px;padding:2px 8px;border-radius:10px;background:rgba(255,0,0,.1);color:var(--accent);font-weight:600;letter-spacing:.04em;margin-left:8px;vertical-align:middle;">COMBINED SUMMARY</span>' : '');
+
+      document.getElementById('summaryOverview').textContent = summary;
+      document.getElementById('whyItMatters').textContent = whyMatters;
+
       const keyConcepts = document.getElementById('keyConcepts');
       keyConcepts.innerHTML = '';
       if (concepts.length > 0) {
@@ -3546,13 +3759,43 @@
     }
 
     /* ─── GENERATE CONTENT ───────────────────────────────── */
+    let quizActive = false;
+    let currentQuizData = [];
+    let quizAnswers = {}; // { questionIndex: { chosen, correct, isCorrect } }
+
+    // Silent quiz loader for initial page load (no loading overlay)
+    async function _loadQuizSilent() {
+      if (!currentSession) return;
+      try {
+        const body = { session_id: currentSession };
+        if (currentTopic) body.topic = currentTopic;
+        body.section = `Random seed: ${Date.now()}`;
+        const res = await fetch(`${API_BASE}/generate-quiz`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        currentQuizData = data.quiz || [];
+        quizAnswers = {};
+        updateQuizUI(currentQuizData);
+        const badge = document.getElementById('quizCount');
+        if (badge) badge.textContent = data.count || currentQuizData.length;
+      } catch (e) { console.warn('[Quiz] silent load failed:', e); }
+    }
+
     async function generateContent(type) {
       if (!currentSession) return;
-      showLoading(`Generating ${type}…`, type === 'quiz' ? 'Creating 5 questions from video content…' : 'Building structured notes…');
+      const loadMsg = type === 'quiz' ? 'Generating new quiz…' : 'Generating notes…';
+      const loadSub = type === 'quiz' ? 'Creating 5 new questions from video content…' : 'Building structured notes…';
+      showLoading(loadMsg, loadSub);
       try {
         const endpoint = type === 'quiz' ? '/generate-quiz' : '/generate-notes';
         const body = { session_id: currentSession };
         if (currentTopic) body.topic = currentTopic;
+        if (type === 'quiz') {
+          body.section = `Generate completely new and different questions. Random seed: ${Date.now()}`;
+        }
 
         const res = await fetch(`${API_BASE}${endpoint}`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -3562,9 +3805,12 @@
         const data = await res.json();
 
         if (type === 'quiz') {
-          updateQuizUI(data.quiz || []);
+          currentQuizData = data.quiz || [];
+          quizAnswers = {};
+          updateQuizUI(currentQuizData);
           const badge = document.getElementById('quizCount');
-          if (badge) badge.textContent = data.count || (data.quiz || []).length;
+          if (badge) badge.textContent = data.count || currentQuizData.length;
+          // Do NOT lock here — lock only when user starts answering
         } else {
           document.getElementById('notesArea').value = data.notes || '';
         }
@@ -3576,17 +3822,45 @@
       }
     }
 
+    /* ─── QUIZ LOCK (disable tabs & chat during quiz) ───── */
+    function setQuizLock(locked) {
+      quizActive = locked;
+      const tabs = document.querySelectorAll('.tab-bar .tab');
+      tabs.forEach(tab => {
+        // Only lock non-quiz tabs
+        if (!tab.textContent.includes('Quiz')) {
+          if (locked) tab.classList.add('quiz-locked');
+          else tab.classList.remove('quiz-locked');
+        }
+      });
+      // Lock the chat panel
+      const chatPanel = document.querySelector('.chat-panel');
+      if (chatPanel) {
+        if (locked) chatPanel.classList.add('quiz-locked');
+        else chatPanel.classList.remove('quiz-locked');
+      }
+    }
+
     /* ─── QUIZ UI ────────────────────────────────────────── */
     function updateQuizUI(quiz) {
       const container = document.getElementById('quizContent');
       container.innerHTML = '';
       if (!quiz || quiz.length === 0) {
         container.innerHTML = `<div class="question-card"><div class="question-num">No quiz available</div><div class="question-text">Could not generate quiz questions. Try again.</div></div>`;
+        setQuizLock(false);
         return;
       }
+      // Show lock banner
+      const banner = document.createElement('div');
+      banner.className = 'quiz-lock-banner';
+      banner.id = 'quizLockBanner';
+      banner.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;flex-shrink:0;"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Quiz in progress — answer all questions to see your report card`;
+      container.appendChild(banner);
+
       quiz.forEach((item, idx) => {
         const card = document.createElement('div');
         card.className = 'question-card';
+        card.id = `quiz-q-${idx}`;
         const opts = item.options || {};
         let optionsHTML = '';
         if (typeof opts === 'object' && Object.keys(opts).length > 0) {
@@ -3594,7 +3868,7 @@
             ? opts.map((v, i) => [String.fromCharCode(65 + i), v])
             : Object.entries(opts);
           optionsHTML = `<div class="options">${entries.map(([key, value]) =>
-            `<div class="option" onclick="selectOption(this,'${_escapeHtml(item.correct)}','${_escapeHtml(key)}')">
+            `<div class="option" onclick="selectQuizOption(this, ${idx}, '${_escapeHtml(item.correct)}','${_escapeHtml(key)}')">
               <span class="option-letter">${_escapeHtml(key)}</span>${_escapeHtml(String(value))}
             </div>`).join('')}</div>`;
         }
@@ -3607,6 +3881,121 @@
       });
     }
 
+    function selectQuizOption(element, questionIdx, correct, chosen) {
+      // Prevent re-answering
+      if (quizAnswers[questionIdx]) return;
+
+      // Lock UI on first answer (user has started the quiz)
+      if (Object.keys(quizAnswers).length === 0) {
+        setQuizLock(true);
+      }
+
+      const isCorrect = chosen === correct;
+      quizAnswers[questionIdx] = { chosen, correct, isCorrect };
+
+      const options = element.closest('.options').querySelectorAll('.option');
+      options.forEach(opt => {
+        opt.style.pointerEvents = 'none'; // disable further clicks
+        opt.classList.remove('selected', 'correct', 'wrong');
+      });
+
+      if (isCorrect) {
+        element.classList.add('correct');
+      } else {
+        element.classList.add('wrong');
+        options.forEach(opt => {
+          if (opt.querySelector('.option-letter').textContent.trim() === correct)
+            opt.classList.add('correct');
+        });
+      }
+
+      const expl = element.closest('.question-card').querySelector('.explanation');
+      if (expl) expl.style.display = 'block';
+
+      // Check if all questions answered → show report card
+      if (Object.keys(quizAnswers).length === currentQuizData.length) {
+        setTimeout(() => showReportCard(), 600);
+      }
+    }
+
+    /* ─── REPORT CARD ────────────────────────────────────── */
+    function showReportCard() {
+      const total = currentQuizData.length;
+      const correctCount = Object.values(quizAnswers).filter(a => a.isCorrect).length;
+      const wrongCount = total - correctCount;
+      const pct = Math.round((correctCount / total) * 100);
+
+      let grade, emoji, feedback, cardClass;
+      if (pct >= 90) {
+        grade = 'Excellent'; emoji = '🏆'; cardClass = 'excellent';
+        feedback = 'Outstanding performance! You have a strong grasp of the concepts. Keep up the excellent work!';
+      } else if (pct >= 70) {
+        grade = 'Good'; emoji = '🎯'; cardClass = 'good';
+        feedback = 'Good job! You understand most of the material. Review the questions you missed to strengthen your knowledge.';
+      } else if (pct >= 50) {
+        grade = 'Average'; emoji = '📚'; cardClass = 'average';
+        feedback = 'You\'re getting there! Focus on the concepts you missed and try watching the relevant sections again.';
+      } else {
+        grade = 'Needs Improvement'; emoji = '💪'; cardClass = 'poor';
+        feedback = 'Don\'t give up! Re-watch the video, take notes on key concepts, and try the quiz again to improve your score.';
+      }
+
+      // Remove lock banner
+      const banner = document.getElementById('quizLockBanner');
+      if (banner) banner.remove();
+
+      // Unlock the UI
+      setQuizLock(false);
+      quizActive = false;
+
+      // Feed quiz performance into confusion detector
+      _addQuizConfusion(pct);
+
+      const container = document.getElementById('quizContent');
+      const reportDiv = document.createElement('div');
+      reportDiv.className = `report-card ${cardClass}`;
+      reportDiv.innerHTML = `
+        <div class="report-header">
+          <div class="report-emoji">${emoji}</div>
+          <div class="report-title">REPORT CARD</div>
+          <div class="report-subtitle">${grade}</div>
+        </div>
+        <div class="report-score-ring">
+          <span class="report-score-value" style="color:${pct >= 70 ? 'var(--success)' : pct >= 50 ? 'var(--warning)' : '#ef4444'}">${pct}%</span>
+        </div>
+        <div class="report-stats">
+          <div class="report-stat correct">
+            <div class="report-stat-value">${correctCount}</div>
+            <div class="report-stat-label">Correct</div>
+          </div>
+          <div class="report-stat wrong">
+            <div class="report-stat-value">${wrongCount}</div>
+            <div class="report-stat-label">Wrong</div>
+          </div>
+          <div class="report-stat total">
+            <div class="report-stat-value">${total}</div>
+            <div class="report-stat-label">Total</div>
+          </div>
+        </div>
+        <div class="report-feedback">${feedback}</div>
+        <div class="report-actions">
+          <button class="chip primary" onclick="generateContent('quiz')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+            </svg>
+            Generate New Quiz
+          </button>
+          <button class="chip" onclick="switchTab('summary',document.querySelector('.tab'))">
+            Back to Summary
+          </button>
+        </div>`;
+      container.appendChild(reportDiv);
+
+      // Scroll to report card
+      reportDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    // Backward compat — old selectOption calls (should not be needed anymore)
     function selectOption(element, correct, chosen) {
       const options = element.closest('.options').querySelectorAll('.option');
       options.forEach(opt => opt.classList.remove('selected', 'correct', 'wrong'));
@@ -3651,18 +4040,38 @@
         return;
       }
       let totalTime = 0;
-      data.plan.forEach(item => {
+      data.plan.forEach((item, idx) => {
         const el = document.createElement('div');
         el.className = 'plan-item';
         const m = Math.floor(totalTime / 60);
         const s = (totalTime % 60).toString().padStart(2, '0');
         totalTime += (item.duration_mins || 0) * 60;
+
+        const importance = item.importance || 'Medium';
+        const impClass = importance.toLowerCase();
+        const impColors = { critical: '#ef4444', high: '#f59e0b', medium: '#3b82f6', low: '#6b7280' };
+        const impColor = impColors[impClass] || '#6b7280';
+
+        const videoTs = item.video_timestamp || '';
+        const videoSection = item.video_section || '';
+
         el.innerHTML = `
           <div class="plan-time">${m}:${s}</div>
-          <div class="plan-content">
-            <div class="plan-topic">${_escapeHtml(item.title || 'Untitled')}</div>
+          <div class="plan-content" style="flex:1;">
+            <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+              <div class="plan-topic">${_escapeHtml(item.title || 'Untitled')}</div>
+              <span style="font-size:9px;padding:2px 8px;border-radius:10px;background:${impColor}22;color:${impColor};font-weight:600;text-transform:uppercase;letter-spacing:.05em;">${_escapeHtml(importance)}</span>
+              ${videoTs ? `<span style="font-size:10px;font-family:var(--mono);color:var(--accent);cursor:pointer;" title="${_escapeHtml(videoSection)}" onclick="fillPrompt({textContent:'Explain what happens at ${videoTs} in the video'})">📍 ${_escapeHtml(videoTs)}</span>` : ''}
+            </div>
             <div class="plan-concepts">${_escapeHtml((item.concepts || []).join(', '))}</div>
+            ${videoSection ? `<div style="font-size:11px;color:var(--dim);margin-top:3px;font-style:italic;">${_escapeHtml(videoSection)}</div>` : ''}
             ${item.checkpoint_question ? `<div class="plan-checkpoint">Checkpoint: ${_escapeHtml(item.checkpoint_question)}</div>` : ''}
+            <button class="chip" style="margin-top:8px;font-size:11px;padding:4px 10px;" onclick="quizOnTopic('${_escapeHtml(item.title || '')}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px;">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+              </svg>
+              Quiz me on this
+            </button>
           </div>`;
         container.appendChild(el);
       });
@@ -3676,6 +4085,59 @@
           <ul style="margin-top:6px;padding-left:14px;">${data.quick_tips.map(t => `<li style="margin-top:3px;">${_escapeHtml(t)}</li>`).join('')}</ul>`;
         container.appendChild(tipsEl);
       }
+    }
+
+    // Quiz on a specific study plan topic
+    async function quizOnTopic(topicName) {
+      if (!currentSession) return;
+      showLoading('Generating topic quiz…', `Creating questions about: ${topicName}`);
+      try {
+        const res = await fetch(`${API_BASE}/generate-quiz`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: currentSession, topic: topicName, section: `Focus ONLY on: ${topicName}. Seed: ${Date.now()}` }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        // Switch to deep learn mode quiz tab to show it
+        if (currentMode === 'exam') {
+          // Show a modal-like quiz overlay in exam mode
+          _showExamQuizOverlay(data.quiz || [], topicName);
+        }
+        showSuccess('Topic quiz ready', `${(data.quiz || []).length} questions on ${topicName}`);
+      } catch (err) {
+        showError('Quiz generation failed', err.message);
+      } finally { hideLoading(); }
+    }
+
+    function _showExamQuizOverlay(quiz, topicName) {
+      let overlay = document.getElementById('examQuizOverlay');
+      if (!overlay) {
+        overlay = document.createElement('div');
+        overlay.id = 'examQuizOverlay';
+        overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;overflow-y:auto;';
+        document.body.appendChild(overlay);
+      }
+      const examQuizAnswers = {};
+      let html = `<div style="max-width:700px;width:100%;max-height:90vh;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:24px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <h3 style="font-size:18px;color:var(--text);">Quiz: ${_escapeHtml(topicName)}</h3>
+          <button class="chip" onclick="document.getElementById('examQuizOverlay').remove()">✕ Close</button>
+        </div>`;
+      quiz.forEach((item, idx) => {
+        const opts = item.options || {};
+        const entries = Array.isArray(opts) ? opts.map((v,i) => [String.fromCharCode(65+i), v]) : Object.entries(opts);
+        html += `<div class="question-card" style="margin-bottom:12px;">
+          <div class="question-num">Q${idx+1} of ${quiz.length}</div>
+          <div class="question-text">${_escapeHtml(item.question || '')}</div>
+          <div class="options">${entries.map(([k,v]) =>
+            `<div class="option" onclick="selectOption(this,'${_escapeHtml(item.correct)}','${_escapeHtml(k)}')">
+              <span class="option-letter">${_escapeHtml(k)}</span>${_escapeHtml(String(v))}
+            </div>`).join('')}</div>
+          ${item.explanation ? `<div style="margin-top:12px;font-size:12px;color:var(--dim);display:none;padding:8px;background:rgba(255,255,255,.03);border-radius:6px;" class="explanation">${_escapeHtml(item.explanation)}</div>` : ''}
+        </div>`;
+      });
+      html += '</div>';
+      overlay.innerHTML = html;
     }
 
     async function generateImportantQuestions() {
@@ -3765,7 +4227,40 @@
       document.getElementById('planProgressBar').style.width = `${pct}%`;
     }
 
-    /* ─── CONFUSION DETECTOR ─────────────────────────────── */
+    /* ─── REGEX-BASED CONFUSION DETECTOR ──────────────────── */
+    const CONFUSION_REGEX = /\b(simpl(?:er|ify|e)\s+(?:explanation|terms?|way|words?))|don'?t\s+understand|(?:i'?m\s+)?confus(?:ed|ing)|what\s+(?:does\s+(?:that|this)|do\s+you)\s+mean|can\s+you\s+(?:explain|clarify)|(?:more|in)\s+(?:simpler?|easier?|basic)\s+(?:terms?|words?|way|language)|(?:not|doesn'?t)\s+mak(?:e|ing)\s+sense|lost\s+(?:me|here)|still\s+(?:don'?t|unclear|confused)|too\s+(?:complex|complicated|hard|difficult|abstract|technical)|break\s+(?:it|this)\s+down|eli5|explain\s+(?:like|as\s+if)\s+i'?m/gi;
+    let confusionHitCount = 0;
+    const CONFUSION_THRESHOLD = 3; // panel activates after 3+ confusion signals
+    let quizPerformanceConfusion = 0; // extra confusion points from poor quiz scores
+
+    function _checkConfusionInMessage(text) {
+      const matches = text.match(CONFUSION_REGEX);
+      if (matches && matches.length > 0) {
+        confusionHitCount += matches.length;
+        console.log(`[Confusion] Regex matches: ${matches.length}, total: ${confusionHitCount}/${CONFUSION_THRESHOLD}`);
+        _evaluateConfusionThreshold();
+      }
+    }
+
+    function _addQuizConfusion(pct) {
+      // Add confusion points based on poor quiz performance
+      if (pct < 40) { quizPerformanceConfusion += 2; }
+      else if (pct < 60) { quizPerformanceConfusion += 1; }
+      _evaluateConfusionThreshold();
+    }
+
+    function _evaluateConfusionThreshold() {
+      const totalSignals = confusionHitCount + quizPerformanceConfusion;
+      if (totalSignals >= CONFUSION_THRESHOLD) {
+        document.getElementById('confusionPanel').classList.add('active');
+        // Update meter based on intensity
+        const meter = document.getElementById('confusionLevel');
+        if (meter) {
+          meter.style.width = `${Math.min(100, (totalSignals / 10) * 100)}%`;
+        }
+      }
+    }
+
     async function loadConfusedTopics() {
       if (!currentSession) return;
       try {
@@ -3780,13 +4275,27 @@
     function updateConfusionPanel() {
       const container = document.getElementById('confusedTopics');
       const meter = document.getElementById('confusionLevel');
-      if (!confusedTopics || confusedTopics.length === 0) {
+      const totalSignals = confusionHitCount + quizPerformanceConfusion;
+      if ((!confusedTopics || confusedTopics.length === 0) && totalSignals < CONFUSION_THRESHOLD) {
         container.innerHTML = `<div class="confusion-topic"><span class="confusion-topic-name">No confusion detected yet</span><span class="confusion-topic-count">0</span></div>`;
         meter.style.width = '0%'; return;
       }
-      const max = Math.max(...confusedTopics.map(t => t.count), 1);
-      meter.style.width = `${Math.min(100, (max / 5) * 100)}%`;
+      const max = Math.max(...confusedTopics.map(t => t.count), totalSignals, 1);
+      meter.style.width = `${Math.min(100, (max / 8) * 100)}%`;
       container.innerHTML = '';
+      // Show regex-based confusion summary first
+      if (totalSignals > 0) {
+        const el = document.createElement('div');
+        el.className = 'confusion-topic';
+        el.innerHTML = `<span class="confusion-topic-name">Chat confusion signals</span><span class="confusion-topic-count">${confusionHitCount}</span>`;
+        container.appendChild(el);
+      }
+      if (quizPerformanceConfusion > 0) {
+        const el = document.createElement('div');
+        el.className = 'confusion-topic';
+        el.innerHTML = `<span class="confusion-topic-name">Quiz performance signals</span><span class="confusion-topic-count">${quizPerformanceConfusion}</span>`;
+        container.appendChild(el);
+      }
       confusedTopics.slice(0, 5).forEach(topic => {
         const el = document.createElement('div');
         el.className = 'confusion-topic';
@@ -3797,7 +4306,6 @@
 
     function updateConfusionUI(confusion, tracking) {
       if (tracking && Object.keys(tracking).length > 0) {
-        document.getElementById('confusionPanel').classList.add('active');
         confusedTopics = Object.entries(tracking).map(([topic, count]) => ({ topic, count }));
         updateConfusionPanel();
       }
@@ -3807,12 +4315,105 @@
       document.getElementById('confusionPanel').classList.toggle('active');
     }
 
+    /* ─── EXAM MODE CHAT ─────────────────────────────────── */
+    function fillExamPrompt(btn) {
+      document.getElementById('examChatInput').value = btn.textContent.trim();
+      document.getElementById('examChatInput').focus();
+    }
+
+    function handleExamKey(e) {
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendExamMessage(); }
+    }
+
+    async function sendExamMessage() {
+      if (isSending) return;
+      const input = document.getElementById('examChatInput');
+      const text = input.value.trim();
+      if (!text || !currentSession) return;
+
+      // Check for confusion patterns
+      _checkConfusionInMessage(text);
+
+      isSending = true;
+      document.getElementById('examSendBtn').disabled = true;
+
+      const msgs = document.getElementById('examMessages');
+      const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'msg user';
+      userMsg.innerHTML = `
+        <div class="msg-avatar">You</div>
+        <div class="msg-content">
+          <div class="msg-meta"><span class="msg-time">${now}</span><span class="msg-name">You</span></div>
+          <div class="bubble">${_escapeHtml(text)}</div>
+        </div>`;
+      msgs.appendChild(userMsg);
+      input.value = ''; input.style.height = 'auto';
+      msgs.scrollTop = msgs.scrollHeight;
+
+      const typing = document.createElement('div');
+      typing.className = 'msg ai';
+      typing.innerHTML = `
+        <div class="msg-avatar">VM</div>
+        <div class="msg-content">
+          <div class="msg-meta"><span class="msg-name">VidMind AI</span></div>
+          <div class="typing-indicator">
+            <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>
+          </div>
+        </div>`;
+      msgs.appendChild(typing);
+      msgs.scrollTop = msgs.scrollHeight;
+
+      try {
+        const res = await fetch(`${API_BASE}/chat`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ session_id: currentSession, question: text }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+
+        updateConfusionUI(data.confusion, data.confusion_tracking);
+        typing.remove();
+
+        const aiMsg = document.createElement('div');
+        aiMsg.className = 'msg ai';
+        aiMsg.innerHTML = `
+          <div class="msg-avatar">VM</div>
+          <div class="msg-content">
+            <div class="msg-meta"><span class="msg-name">VidMind AI</span><span class="msg-time">${now}</span></div>
+            <div class="bubble">
+              <div style="white-space:pre-wrap;word-break:break-word;">${_escapeHtml(data.answer)}</div>
+            </div>
+          </div>`;
+        msgs.appendChild(aiMsg);
+        msgs.scrollTop = msgs.scrollHeight;
+      } catch (err) {
+        typing.remove();
+        const errMsg = document.createElement('div');
+        errMsg.className = 'msg ai';
+        errMsg.innerHTML = `
+          <div class="msg-avatar">VM</div>
+          <div class="msg-content">
+            <div class="msg-meta"><span class="msg-name">VidMind AI</span></div>
+            <div class="bubble" style="color:var(--warning)">Sorry, something went wrong (${_escapeHtml(err.message)}).</div>
+          </div>`;
+        msgs.appendChild(errMsg);
+      } finally {
+        isSending = false;
+        document.getElementById('examSendBtn').disabled = false;
+      }
+    }
+
     /* ─── CHAT ───────────────────────────────────────────── */
     async function sendMessage() {
       if (isSending) return;
       const input = document.getElementById('chatInput');
       const text = input.value.trim();
       if (!text || !currentSession) return;
+
+      // Check for confusion patterns in deep learn chat
+      _checkConfusionInMessage(text);
 
       isSending = true;
       document.getElementById('sendBtn').disabled = true;
@@ -3944,6 +4545,37 @@
       } finally { hideLoading(); }
     }
 
+    /* ─── EXPORT NOTES PDF (from Notes tab) ───────────────── */
+    async function exportNotesPDF() {
+      const notesText = document.getElementById('notesArea').value.trim();
+      if (!notesText) {
+        // If no notes in textarea, try generating first via session
+        if (currentSession) {
+          return exportNotes();
+        }
+        showWarning('No notes to export', 'Generate notes first by clicking "AI Notes".');
+        return;
+      }
+      showLoading('Generating PDF…', 'Exporting your notes as PDF…');
+      try {
+        const title = currentSummary?.title || 'My Study Notes';
+        const res = await fetch(`${API_BASE}/export-custom-notes-pdf`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ notes_text: notesText, title }),
+        });
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = 'VidMind_Notes.pdf';
+        document.body.appendChild(a); a.click();
+        window.URL.revokeObjectURL(url); document.body.removeChild(a);
+        showSuccess('PDF downloaded', 'VidMind_Notes.pdf');
+      } catch (err) {
+        showError('Failed to export PDF', err.message);
+      } finally { hideLoading(); }
+    }
+
     /* ─── EXPORT CHAT HISTORY ────────────────────────────── */
     async function exportChat() {
       if (!currentSession) return;
@@ -3999,9 +4631,20 @@
     }
 
     function switchTab(id, btn) {
+      // Block tab switching during active quiz (except to quiz tab itself)
+      if (quizActive && id !== 'quiz') {
+        showWarning('Quiz in progress', 'Please complete the quiz before switching tabs.');
+        return;
+      }
       document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-      btn.classList.add('active');
+      if (btn) btn.classList.add('active');
+      else {
+        // Find the tab button for this id
+        document.querySelectorAll('.tab').forEach(t => {
+          if (t.textContent.trim().toLowerCase().startsWith(id)) t.classList.add('active');
+        });
+      }
       document.getElementById('tab-' + id).classList.add('active');
     }
 
