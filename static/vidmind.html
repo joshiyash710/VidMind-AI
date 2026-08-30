@@ -3338,6 +3338,31 @@
     }
 
     /* ─── LOAD VIDEO ─────────────────────────────────────── */
+    // Mirror of backend get_video_id(): returns an 11-char id or null.
+    function extractYouTubeId(url) {
+      if (!url) return null;
+      url = url.trim();
+      const ID = /^[A-Za-z0-9_-]{11}$/;
+      if (ID.test(url)) return url;
+      try {
+        const u = new URL(url);
+        const host = u.hostname.replace(/^www\./, '');
+        if (host === 'youtu.be') {
+          const vid = u.pathname.split('/').filter(Boolean)[0] || '';
+          if (ID.test(vid)) return vid;
+        }
+        if (host.includes('youtube.com')) {
+          const v = u.searchParams.get('v');
+          if (v && ID.test(v)) return v;
+          const parts = u.pathname.split('/').filter(Boolean);
+          if (parts.length >= 2 && ['embed', 'v', 'shorts', 'live', 'e'].includes(parts[0])
+              && ID.test(parts[1])) return parts[1];
+        }
+      } catch (e) { /* not a URL — fall through */ }
+      const m = url.match(/(?:v=|vi=|v\/|youtu\.be\/|embed\/|shorts\/|live\/)([A-Za-z0-9_-]{11})/);
+      return m ? m[1] : null;
+    }
+
     async function loadVideo() {
       const urlText = document.getElementById('urlInput').value.trim();
       if (!urlText) { showWarning('No URL', 'Please paste at least one YouTube URL.'); return; }
@@ -3346,6 +3371,23 @@
       if (urls.length > 5) {
         showWarning('Too many videos', 'Maximum 5 videos at a time. Using first 5.');
         urls.splice(5);
+      }
+
+      // Friendly client-side validation before hitting the server
+      const invalid = urls.filter(u => !extractYouTubeId(u));
+      if (invalid.length) {
+        showToast(
+          'warning',
+          'That doesn\'t look like a YouTube link',
+          `${invalid.length} of ${urls.length} ${invalid.length === 1 ? 'entry is' : 'entries are'} not a valid YouTube URL.`,
+          9000,
+          [
+            'Paste a link like https://www.youtube.com/watch?v=… or https://youtu.be/…',
+            'Make sure it\'s a video URL, not the homepage or this site\'s address',
+            'No captions? Use the "📋 Paste Transcript" tab instead',
+          ]
+        );
+        return;
       }
 
       const btn = document.getElementById('analyzeBtn');
