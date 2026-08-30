@@ -1626,21 +1626,57 @@ def generate_pdf_from_notes(notes_text: str, title: str = "VidMind AI Notes") ->
                 self.cell(0, 10, f"Page {self.page_no()}", align="C")
 
         def safe(t):
+            # Strip markdown emphasis
             t = re.sub(r'\*\*(.+?)\*\*', r'\1', t)
             t = re.sub(r'\*(.+?)\*',     r'\1', t)
             t = re.sub(r'`(.+?)`',       r'\1', t)
-            for a, b in [
-                ('\u2019', "'"), ('\u2018', "'"),
-                ('\u201c', '"'), ('\u201d', '"'),
-                ('\u2014', '-'), ('\u2013', '-'),
-            ]:
+            # Transliterate common non-latin-1 symbols to ASCII so they stay readable
+            replacements = {
+                '\u2019': "'", '\u2018': "'", '\u201c': '"', '\u201d': '"',
+                '\u2014': '-', '\u2013': '-', '\u2026': '...',
+                '\u2192': '->', '\u2190': '<-', '\u2194': '<->',
+                '\u21d2': '=>', '\u21d0': '<=',
+                '\u2022': '*', '\u25aa': '*', '\u25e6': '*', '\u2023': '*', '\u00b7': '*',
+                '\u2248': '~', '\u2264': '<=', '\u2265': '>=', '\u2260': '!=',
+                '\u00d7': 'x', '\u00f7': '/', '\u221e': 'inf', '\u2211': 'sum',
+                '\u221a': 'sqrt', '\u0394': 'delta', '\u03bc': 'u', '\u03c0': 'pi',
+                '\u2080': '0', '\u2081': '1', '\u2082': '2', '\u2083': '3', '\u2084': '4',
+                '\u2085': '5', '\u2086': '6', '\u2087': '7', '\u2088': '8', '\u2089': '9',
+                '\u2070': '0', '\u00b9': '1', '\u2074': '4', '\u2075': '5', '\u2076': '6',
+                '\u2077': '7', '\u2078': '8', '\u2079': '9',
+                '\u2713': '[x]', '\u2714': '[x]', '\u2717': '[ ]', '\u2718': '[ ]',
+                '\u00a0': ' ', '\u2009': ' ', '\u202f': ' ', '\u200b': '',
+            }
+            for a, b in replacements.items():
                 t = t.replace(a, b)
+            # Final guarantee: drop anything still outside latin-1 (e.g. emoji)
+            # so fpdf's core font can never raise an encoding exception.
+            t = t.encode('latin-1', 'ignore').decode('latin-1')
             return t
 
         pdf = NotesPDF()
+        pdf.set_margins(15, 15, 15)
         pdf.set_auto_page_break(auto=True, margin=18)
         pdf.add_page()
-        pdf.set_margins(15, 15, 15)
+
+        # Full usable width; render each line defensively so one bad line
+        # can never abort the whole document.
+        def write(text, h):
+            text = safe(text)
+            if not text.strip():
+                return
+            pdf.set_x(pdf.l_margin)              # always start at left margin
+            try:
+                pdf.multi_cell(pdf.epw, h, text)
+            except Exception as e:
+                # Fallback: hard-wrap into chunks that always fit
+                print(f"[pdf] line render fallback: {type(e).__name__}: {str(e)[:80]}")
+                for i in range(0, len(text), 90):
+                    pdf.set_x(pdf.l_margin)
+                    try:
+                        pdf.multi_cell(pdf.epw, h, text[i:i + 90])
+                    except Exception:
+                        continue
 
         for line in notes_text.split('\n'):
             s = line.strip()
@@ -1650,27 +1686,27 @@ def generate_pdf_from_notes(notes_text: str, title: str = "VidMind AI Notes") ->
             if s.startswith('# ') and not s.startswith('## '):
                 pdf.set_font("Helvetica", "B", 16)
                 pdf.set_text_color(30, 58, 95)
-                pdf.multi_cell(0, 9, safe(s[2:]))
+                write(s[2:], 9)
                 pdf.ln(2)
             elif s.startswith('## '):
                 pdf.set_font("Helvetica", "B", 13)
                 pdf.set_text_color(46, 117, 182)
                 pdf.ln(4)
-                pdf.multi_cell(0, 8, safe(s[3:]))
+                write(s[3:], 8)
                 pdf.ln(2)
             elif s.startswith('### '):
                 pdf.set_font("Helvetica", "B", 11)
                 pdf.set_text_color(50, 50, 80)
                 pdf.ln(2)
-                pdf.multi_cell(0, 7, safe(s[4:]))
+                write(s[4:], 7)
             elif s.startswith('- '):
                 pdf.set_font("Helvetica", "", 10)
                 pdf.set_text_color(50, 50, 50)
-                pdf.multi_cell(0, 6, f"  * {safe(s[2:])}")
+                write(f"  * {s[2:]}", 6)
             else:
                 pdf.set_font("Helvetica", "", 10)
                 pdf.set_text_color(40, 40, 40)
-                pdf.multi_cell(0, 6, safe(s))
+                write(s, 6)
 
         return bytes(pdf.output())
 

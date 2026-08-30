@@ -3422,21 +3422,9 @@
 
       const data = await response.json();
 
-      // ── NO_TRANSCRIPT ──
+      // ── NO_TRANSCRIPT → gracefully hand off to Paste Transcript ──
       if (data.success === false || data.error === 'NO_TRANSCRIPT') {
-        // Extract video_id for the diagnose link
-        const vid = data.video_id || null;
-        showError(
-          'No Captions Available',
-          'All 3 methods failed: youtube-transcript-api → yt-dlp → InnerTube.',
-          data.debug_tips || [
-            'Check if the video has CC/subtitles enabled on YouTube',
-            'Age-restricted or region-locked videos may block transcript access',
-            'Very new uploads (< 1 hour) may not have auto-captions yet',
-            'Run /diagnose/{video_id} for a detailed per-method report',
-          ],
-          vid
-        );
+        offerTranscriptFallback(url);
         return false;
       }
 
@@ -3543,6 +3531,33 @@
       tabTx.classList.toggle('tab-active', !isUrl);
     }
 
+    /* ─── GRACEFUL FALLBACK: URL blocked → guide user to paste ──────────── */
+    function offerTranscriptFallback(url) {
+      // Switch to the Paste Transcript tab and pre-fill the URL so timestamps work
+      switchInputMode('transcript');
+      const urlField = document.getElementById('transcriptUrlInput');
+      if (urlField && url) urlField.value = url;
+
+      // Explain what happened and how to get the transcript (warning style + steps)
+      showToast(
+        'warning',
+        'YouTube blocked our server',
+        'The hosting server\'s IP is rate-limited by YouTube, so it can\'t fetch this ' +
+        'transcript automatically. No problem — just paste it in:',
+        14000,
+        [
+          'On the video, click "…more" under the title → "Show transcript"',
+          'Select all the transcript text and copy it',
+          'Paste it in the box below, then click "Build from Transcript"',
+          'Your URL is already filled in, so timestamps will still work',
+        ]
+      );
+
+      // Bring the input into view and focus the transcript box
+      document.querySelector('.input-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setTimeout(() => document.getElementById('transcriptInput')?.focus(), 400);
+    }
+
     async function _loadMultipleVideos(urls) {
       const response = await fetch(`${API_BASE}/load-multiple-videos`, {
         method: 'POST',
@@ -3553,14 +3568,8 @@
       const data = await response.json();
 
       if (!response.ok || !data.session_id) {
-        const skipped = data.skipped || data.detail?.skipped || [];
-        showError(
-          'No Videos Loaded',
-          `Could not load captions from any of the ${urls.length} videos.`,
-          ['All 3 transcript methods were tried for each URL',
-            'Ensure the videos have subtitles/captions enabled',
-            'Use GET /diagnose/{video_id} for per-video debugging']
-        );
+        // All videos failed to fetch — likely the server-IP block. Guide to paste.
+        offerTranscriptFallback(urls[0]);
         return;
       }
 

@@ -129,15 +129,12 @@ sessions: dict = {}
 # ================== LOGGING MIDDLEWARE ==================
 @app.middleware("http")
 async def log_requests(request: Request, call_next):
+    # NOTE: Do not read request.body() here. Consuming the stream forces a
+    # _receive replay hack that is fundamentally incompatible with
+    # StreamingResponse (it truncates PDF/download responses to 0 bytes).
+    # Log method + path only; the endpoints log their own payloads.
     if request.method == "POST":
-        body = await request.body()
         logger.info(f"📨 {request.method} {request.url.path}")
-        logger.info(f"   Body: {body.decode('utf-8', errors='ignore')[:300]}")
-
-        async def receive():
-            return {"type": "http.request", "body": body}
-
-        request._receive = receive
 
     response = await call_next(request)
     return response
