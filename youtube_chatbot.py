@@ -956,6 +956,91 @@ def get_transcript_with_timestamps(video_id: str):
     return plain_text, chunks, normalized, detected_lang
 
 
+# ================== PASTED TRANSCRIPT (browser-side, no YouTube fetch) ==================
+def _timestamp_to_seconds(ts: str):
+    """Convert 'm:ss' or 'h:mm:ss' to float seconds. Returns None if invalid."""
+    parts = ts.strip().split(":")
+    if not parts or not all(p.isdigit() for p in parts):
+        return None
+    nums = [int(p) for p in parts]
+    if len(nums) == 2:
+        return float(nums[0] * 60 + nums[1])
+    if len(nums) == 3:
+        return float(nums[0] * 3600 + nums[1] * 60 + nums[2])
+    return None
+
+
+# Matches a line that STARTS with a timestamp (optionally followed by text on same line)
+_TS_LINE_RE = re.compile(r'^\s*((?:\d{1,2}:)?\d{1,2}:\d{2})\b\s*(.*)$')
+
+
+def parse_pasted_transcript(text: str) -> list:
+    """
+    Parse a user-pasted YouTube transcript into normalized
+    [{"text": str, "start": float}] items.
+
+    Handles YouTube's "Show transcript" copy format, where each entry is a
+    timestamp followed by its text — either on the same line ("0:04 hello")
+    or on separate lines ("0:04\\nhello"). Also tolerates plain text with no
+    timestamps at all (returned as a single time-less segment).
+    """
+    if not text or not text.strip():
+        return []
+
+    lines = [ln.strip() for ln in text.replace("\r", "").split("\n")]
+    lines = [ln for ln in lines if ln]
+
+    items = []
+    pending_start = None
+    found_ts = False
+
+    for ln in lines:
+        m = _TS_LINE_RE.match(ln)
+        secs = _timestamp_to_seconds(m.group(1)) if m else None
+
+        if secs is not None:
+            found_ts = True
+            rest = m.group(2).strip()
+            if rest:
+                items.append({"text": rest, "start": secs})
+                pending_start = None
+            else:
+                pending_start = secs
+            continue
+
+        # Plain text line
+        if pending_start is not None:
+            items.append({"text": ln, "start": pending_start})
+            pending_start = None
+        else:
+            start = items[-1]["start"] if items else 0.0
+            items.append({"text": ln, "start": start})
+
+    # No timestamps found → coalesce into a single blob so chunking still works
+    if not found_ts:
+        blob = " ".join(i["text"] for i in items).strip()
+        return [{"text": blob, "start": 0.0}] if blob else []
+
+    return [{"text": i["text"].strip(), "start": i["start"]}
+            for i in items if i["text"].strip()]
+
+
+def build_transcript_from_paste(text: str, video_id: str):
+    """
+    Mirror get_transcript_with_timestamps() but from user-pasted text instead
+    of fetching from YouTube. Returns (plain_text, chunks, normalized, lang)
+    or (None, [], [], None).
+    """
+    normalized = parse_pasted_transcript(text)
+    if not normalized:
+        return None, [], [], None
+    plain_text = " ".join(i["text"] for i in normalized)
+    chunks = _build_chunks(normalized, video_id)
+    print(f"[paste] Parsed {len(normalized)} items | {len(plain_text):,} chars "
+          f"| {len(chunks)} chunks")
+    return plain_text, chunks, normalized, "en"
+
+
 # ================== MEMORY ==================
 class InMemoryHistory(BaseChatMessageHistory):
     def __init__(self):

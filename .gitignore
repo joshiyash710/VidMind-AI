@@ -8,3 +8,5 @@ youtube_cookies.txt
 dist/
 build/
 .gemini/
+server.log
+*.log

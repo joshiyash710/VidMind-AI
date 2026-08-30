@@ -32,6 +32,7 @@ os.environ["LANGCHAIN_PROJECT"] = os.getenv("LANGCHAIN_PROJECT", "vidmind-ai")
 from youtube_chatbot import (
     get_video_id,
     get_transcript_with_timestamps,
+    build_transcript_from_paste,
     generate_summary,
     generate_quiz,
     generate_notes,
@@ -200,6 +201,19 @@ class LoadMultipleVideosRequest(BaseModel):
         if not cleaned:
             raise ValueError('At least one valid URL required')
         return cleaned
+
+
+class LoadTranscriptRequest(BaseModel):
+    transcript: str           = Field(..., min_length=1)
+    url:        Optional[str] = None
+    title:      Optional[str] = None
+
+    @field_validator('transcript')
+    @classmethod
+    def validate_transcript(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError('Transcript cannot be empty')
+        return v
 
 
 class ChatRequest(BaseModel):
@@ -624,6 +638,104 @@ async def load_video(req: LoadVideoRequest):
         "language_name":     _lang_display_name(lang),
         "translated":        _is_non_english(lang),
         "chapters":          chapters,
+        **summary,
+    }
+
+
+# ── LOAD FROM PASTED TRANSCRIPT (no YouTube fetch — bypasses IP blocking) ──────
+@app.post("/load-transcript")
+async def load_transcript(req: LoadTranscriptRequest):
+    logger.info(f"[load-transcript] {len(req.transcript)} chars pasted")
+
+    # 1. Resolve a video_id — real one (for timestamp deep-links) if a URL was
+    #    given, otherwise a synthetic placeholder. YouTube is never contacted.
+    video_id = get_video_id(req.url) if req.url else None
+    has_real_video_id = bool(video_id and re.match(r'^[A-Za-z0-9_-]{11}$', video_id))
+    if not has_real_video_id:
+        video_id = "pasted_" + uuid.uuid4().hex[:4]  # 11 chars, non-clickable
+
+    # 2. Parse the pasted transcript into the same shape as a fetched one
+    transcript, chunks, raw, lang = build_transcript_from_paste(req.transcript, video_id)
+    if not transcript:
+        return JSONResponse(status_code=200, content={
+            "success":  False,
+            "error":    "EMPTY_TRANSCRIPT",
+            "video_id": video_id,
+            "message":  "The pasted text was empty or could not be parsed.",
+        })
+
+    lang = lang or "en"
+    logger.info(
+        f"[load-transcript] Parsed OK: {len(transcript):,} chars | "
+        f"{len(chunks)} chunks | real_id={has_real_video_id}"
+    )
+
+    # 3. Build RAG chain
+    try:
+        chain, get_ts, retriever = build_rag_chain(transcript, chunks, "Video 1")
+    except Exception as e:
+        logger.error(f"[load-transcript] build_rag_chain failed: {e}", exc_info=True)
+        raise HTTPException(status_code=500,
+                            detail=f"Failed to build knowledge base: {str(e)}")
+
+    # 4. Generate summary
+    try:
+        summary = generate_summary(transcript)
+    except Exception as e:
+        logger.warning(f"[load-transcript] generate_summary failed: {e}")
+        summary = {
+            "title":              req.title or "Video Summary",
+            "summary":            "Summary could not be generated.",
+            "why_it_matters":     "",
+            "key_concepts":       [],
+            "difficulty":         "Intermediate",
+            "study_time_minutes": 15,
+        }
+    if req.title:
+        summary["title"] = req.title
+
+    # 5. Create session (identical shape to /load-video)
+    session_id = str(uuid.uuid4())
+    sessions[session_id] = {
+        "chain":             chain,
+        "get_timestamps":    get_ts,
+        "retriever":         retriever,
+        "transcript":        transcript,
+        "raw_transcript":    raw,
+        "chunks":            chunks,
+        "all_transcripts":   [transcript],
+        "all_raw":           [raw],
+        "video_id":          video_id,
+        "video_ids":         [video_id],
+        "video_count":       1,
+        "detected_language": lang,
+        "chat_history":      [],
+        "summary":           summary,
+        "video_summaries":   [summary],
+        "cached_notes":      None,
+        "confused_topics":   {},
+        "mode":              None,
+    }
+
+    # 6. Register for cross-video queries
+    try:
+        add_video_to_session(session_id, video_id, transcript, chunks, "Video 1")
+    except Exception as e:
+        logger.warning(f"[load-transcript] add_video_to_session non-fatal: {e}")
+
+    chapters = _build_chapters(chunks)
+
+    logger.info(f"[load-transcript] ✅ session={session_id} | chapters={len(chapters)}")
+    return {
+        "success":           True,
+        "session_id":        session_id,
+        "video_id":          video_id,
+        "has_real_video_id": has_real_video_id,
+        "detected_language": lang,
+        "language_name":     _lang_display_name(lang),
+        "translated":        _is_non_english(lang),
+        "chapters":          chapters,
+        "source":            "pasted_transcript",
         **summary,
     }
 

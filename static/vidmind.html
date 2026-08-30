@@ -2418,30 +2418,87 @@
         Paste YouTube URLs. Get AI-powered summaries, quizzes, notes, and exam prep — all in one place.
       </p>
 
-      <div class="input-card">
-        <textarea class="url-textarea" id="urlInput"
-          placeholder="Paste one or multiple YouTube URLs (one per line)&#10;Example:&#10;https://www.youtube.com/watch?v=example1&#10;https://youtu.be/example2"
-          rows="3" autocomplete="off"></textarea>
+      <style>
+        .input-tabs { display:flex; gap:8px; margin-bottom:18px; }
+        .input-tab {
+          flex:1; padding:10px 14px; border-radius:10px; cursor:pointer;
+          font-family:inherit; font-size:.9rem; font-weight:600;
+          background:rgba(255,255,255,.04); color:var(--dim);
+          border:1px solid rgba(255,255,255,.08); transition:all .2s;
+        }
+        .input-tab:hover { color:var(--fg,#f1f1f1); }
+        .input-tab.tab-active {
+          background:rgba(255,0,0,.12); color:#ff4d4d;
+          border-color:rgba(255,0,0,.4);
+        }
+        #transcriptUrlInput {
+          width:100%; padding:12px 14px; margin-bottom:12px; border-radius:10px;
+          background:rgba(255,255,255,.04); color:inherit; font-family:inherit;
+          font-size:.9rem; border:1px solid rgba(255,255,255,.08); box-sizing:border-box;
+        }
+      </style>
 
-        <div class="input-hint">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10" />
-            <path d="M12 16v-4M12 8h.01" />
-          </svg>
-          You can add up to 5 videos for combined learning. If a video fails, the others still load.
+      <div class="input-card">
+        <!-- Input mode tabs -->
+        <div class="input-tabs">
+          <button type="button" id="tabUrl" class="input-tab tab-active"
+            onclick="switchInputMode('url')">🔗 By URL</button>
+          <button type="button" id="tabTranscript" class="input-tab"
+            onclick="switchInputMode('transcript')">📋 Paste Transcript</button>
+        </div>
+
+        <!-- ── URL MODE ── -->
+        <div id="urlMode">
+          <textarea class="url-textarea" id="urlInput"
+            placeholder="Paste one or multiple YouTube URLs (one per line)&#10;Example:&#10;https://www.youtube.com/watch?v=example1&#10;https://youtu.be/example2"
+            rows="3" autocomplete="off"></textarea>
+
+          <div class="input-hint">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            You can add up to 5 videos for combined learning. If a video fails, the others still load.
+          </div>
+
+          <button class="analyze-btn" id="analyzeBtn" onclick="loadVideo()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            Analyze Videos
+          </button>
+        </div>
+
+        <!-- ── TRANSCRIPT MODE ── -->
+        <div id="transcriptMode" class="hidden">
+          <div class="input-hint" style="margin-bottom:14px;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M12 16v-4M12 8h.01" />
+            </svg>
+            Works even when the server can't fetch from YouTube. On the video, click
+            <b>&nbsp;…more&nbsp;</b> → <b>&nbsp;Show transcript&nbsp;</b>, then copy it and paste below.
+          </div>
+
+          <input type="text" id="transcriptUrlInput"
+            placeholder="(optional) YouTube URL — enables clickable timestamps" autocomplete="off" />
+
+          <textarea class="url-textarea" id="transcriptInput"
+            placeholder="Paste the copied transcript here…&#10;0:00 Welcome to the video&#10;0:08 Today we'll cover…"
+            rows="7" autocomplete="off"></textarea>
+
+          <button class="analyze-btn" id="buildTranscriptBtn" onclick="loadPastedTranscript()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+            Build from Transcript
+          </button>
         </div>
 
         <!-- Backend health / library status -->
-        <div class="health-bar" id="healthBar">
+        <div class="health-bar" id="healthBar" style="margin-top:16px;">
           <span style="color:var(--dim)">Checking backend…</span>
         </div>
-
-        <button class="analyze-btn" id="analyzeBtn" onclick="loadVideo()">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <polyline points="9 18 15 12 9 6" />
-          </svg>
-          Analyze Videos
-        </button>
       </div>
 
       <div class="stats">
@@ -3390,6 +3447,12 @@
       }
 
       // ── Success ──
+      applySingleLoadSuccess(data, url);
+      return true;
+    }
+
+    // Shared success handler for both URL-fetch and pasted-transcript loads.
+    function applySingleLoadSuccess(data, displayLabel) {
       currentSession = data.session_id;
       currentSummary = data;
       currentVideoId = data.video_id;
@@ -3409,15 +3472,75 @@
         || data.title?.split('—')[0]?.trim()
         || 'General';
 
+      const label = displayLabel || data.title || 'Pasted transcript';
       document.getElementById('displayUrl').textContent =
-        url.length > 60 ? url.substring(0, 57) + '…' : url;
+        label.length > 60 ? label.substring(0, 57) + '…' : label;
 
       updateLangBadge(data.detected_language, data.translated, data.language_name);
-      _showDiagnoseBtn(data.video_id);
+      // Diagnose only makes sense for a real YouTube video id
+      if (data.has_real_video_id === false) {
+        document.getElementById('diagnoseBtn')?.classList.add('hidden');
+      } else {
+        _showDiagnoseBtn(data.video_id);
+      }
       updateVideoChips();
       _storeChapters(data.chapters || []);
       _showModeSelection();
-      return true;
+    }
+
+    /* ─── LOAD FROM PASTED TRANSCRIPT (bypasses YouTube IP blocking) ─────── */
+    async function loadPastedTranscript() {
+      const transcript = document.getElementById('transcriptInput').value.trim();
+      if (!transcript) {
+        showWarning('No transcript', 'Paste the transcript text copied from YouTube first.');
+        return;
+      }
+      const url = document.getElementById('transcriptUrlInput').value.trim();
+
+      const btn = document.getElementById('buildTranscriptBtn');
+      btn.disabled = true;
+      showLoading('Building your knowledge base…',
+        'Parsing transcript, creating embeddings, and generating your summary…', false);
+
+      try {
+        const response = await fetch(`${API_BASE}/load-transcript`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ transcript, url: url || null }),
+        });
+        const data = await response.json();
+
+        if (data.success === false) {
+          showError('Could Not Parse Transcript',
+            data.message || 'The pasted text was empty or unreadable.');
+          return;
+        }
+        if (!response.ok) {
+          const detail = data.detail || data.message || `HTTP ${response.status}`;
+          showError('Server Error', typeof detail === 'object' ? JSON.stringify(detail) : detail);
+          return;
+        }
+        applySingleLoadSuccess(data, url || data.title);
+      } catch (err) {
+        console.error('[loadPastedTranscript]', err);
+        showError('Unexpected Error', err.message || 'Something went wrong.');
+      } finally {
+        hideLoading();
+        btn.disabled = false;
+      }
+    }
+
+    /* ─── INPUT MODE TOGGLE (URL  ⇄  Transcript) ────────────────────────── */
+    function switchInputMode(mode) {
+      const urlMode = document.getElementById('urlMode');
+      const txMode  = document.getElementById('transcriptMode');
+      const tabUrl  = document.getElementById('tabUrl');
+      const tabTx   = document.getElementById('tabTranscript');
+      const isUrl = mode === 'url';
+      urlMode.classList.toggle('hidden', !isUrl);
+      txMode.classList.toggle('hidden', isUrl);
+      tabUrl.classList.toggle('tab-active', isUrl);
+      tabTx.classList.toggle('tab-active', !isUrl);
     }
 
     async function _loadMultipleVideos(urls) {
