@@ -3081,7 +3081,11 @@
     let backendLibraries = {};
     let currentVideoId = null;   // ← track primary video_id for /diagnose
 
-    const API_BASE = 'http://127.0.0.1:8000';
+    // When served by the FastAPI app (production), use same-origin (relative URLs).
+    // When opening the HTML file directly from disk (file://), fall back to local dev server.
+    const API_BASE = window.location.protocol === 'file:'
+      ? 'http://127.0.0.1:8000'
+      : '';
 
     /* ─── TOAST SYSTEM ────────────────────────────────────── */
     function showToast(type, title, message, duration = 5000, tips = [], diagnoseVideoId = null) {
